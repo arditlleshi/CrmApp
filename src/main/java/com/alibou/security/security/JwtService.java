@@ -1,4 +1,4 @@
-package com.alibou.security.config;
+package com.alibou.security.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

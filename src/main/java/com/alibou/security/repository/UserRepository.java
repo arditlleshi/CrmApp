@@ -1,5 +1,6 @@
-package com.alibou.security.user;
+package com.alibou.security.repository;
 
+import com.alibou.security.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
