@@ -4,9 +4,7 @@ import com.alibou.security.dto.AuthenticationResponseDto;
 import com.alibou.security.dto.LoginRequestDto;
 import com.alibou.security.dto.UserRegisterDto;
 import com.alibou.security.dto.UserResponseDto;
-import com.alibou.security.model.User;
 import com.alibou.security.service.UserService;
-import com.alibou.security.service.implementation.UserServiceImplementation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +30,13 @@ public class UserController {
         Optional<UserResponseDto> userResponseDto = userService.findById(id);
         return userResponseDto.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
-//    @GetMapping
-//    public ResponseEntity<List<UserResponseDto>> findAll(){
-//        return userService.findAll().get();
-//    }
+    @GetMapping
+    public ResponseEntity<List<UserResponseDto>> findAll(){
+        List<UserResponseDto> userResponseDtoList = userService.findAll();
+        return ResponseEntity.ok(userResponseDtoList);
+    }
+    @PostMapping("/update/{id}")
+    public ResponseEntity<UserResponseDto> update(@PathVariable("id") Integer id, @RequestBody UserResponseDto userResponseDto){
+        return ResponseEntity.ok(userService.update(id, userResponseDto));
+    }
 }

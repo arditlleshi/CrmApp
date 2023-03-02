@@ -1,14 +1,14 @@
 package com.alibou.security.service.implementation;
 
 import com.alibou.security.dto.AuthenticationResponseDto;
-import com.alibou.security.dto.UserResponseDto;
-import com.alibou.security.model.Role;
-import com.alibou.security.repository.RoleRepository;
-import com.alibou.security.security.JwtService;
 import com.alibou.security.dto.LoginRequestDto;
 import com.alibou.security.dto.UserRegisterDto;
+import com.alibou.security.dto.UserResponseDto;
+import com.alibou.security.model.Role;
 import com.alibou.security.model.User;
+import com.alibou.security.repository.RoleRepository;
 import com.alibou.security.repository.UserRepository;
+import com.alibou.security.security.JwtService;
 import com.alibou.security.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,12 +52,27 @@ public class UserServiceImplementation implements UserService {
 
     @Override
     public List<UserResponseDto> findAll() {
-        return null;
+        List<User> users = userRepository.findAll();
+        return convertToResponseDto(users);
     }
 
     @Override
-    public UserResponseDto update(UserRegisterDto userRegisterDto) {
-        return null;
+    public UserResponseDto update(Integer id, UserResponseDto userResponseDto) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()){
+            User user = optionalUser.get();
+            user.setFirstname(userResponseDto.getFirstname());
+            user.setLastname(userResponseDto.getLastname());
+            if (userRepository.findByEmail(userResponseDto.getEmail()).isEmpty() && user.getEmail() != userResponseDto.getEmail()){
+                user.setEmail(userResponseDto.getEmail());
+            }else {
+                throw new IllegalStateException("Email is taken!");
+            }
+            userRepository.save(user);
+            return convertToResponseDto(user);
+        }else {
+            throw new UsernameNotFoundException("User not found with id: " + id);
+        }
     }
 
     public AuthenticationResponseDto authenticate(LoginRequestDto request) {
@@ -88,5 +104,21 @@ public class UserServiceImplementation implements UserService {
                 .collect(Collectors.toList());
         responseDto.setRoleNames(roleNames);
         return responseDto;
+    }
+    public List<UserResponseDto> convertToResponseDto(List<User> userList) {
+        List<UserResponseDto> userResponseDtoList = new ArrayList<>();
+        for (User user : userList) {
+            UserResponseDto userResponseDto = new UserResponseDto();
+            userResponseDto.setId(user.getId());
+            userResponseDto.setFirstname(user.getFirstname());
+            userResponseDto.setLastname(user.getLastname());
+            userResponseDto.setEmail(user.getEmail());
+            List<String> roleNames = user.getRoles().stream()
+                    .map(role -> role.getName().toString())
+                    .collect(Collectors.toList());
+            userResponseDto.setRoleNames(roleNames);
+            userResponseDtoList.add(userResponseDto);
+        }
+        return userResponseDtoList;
     }
 }

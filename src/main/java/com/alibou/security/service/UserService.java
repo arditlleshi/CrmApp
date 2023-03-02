@@ -12,6 +12,6 @@ public interface UserService {
     UserResponseDto create(UserRegisterDto userRegisterDto);
     Optional<UserResponseDto> findById(Integer id);
     List<UserResponseDto> findAll();
-    UserResponseDto update(UserRegisterDto userRegisterDto);
+    UserResponseDto update(Integer id, UserResponseDto userResponseDto);
     AuthenticationResponseDto authenticate(LoginRequestDto request);
 }
