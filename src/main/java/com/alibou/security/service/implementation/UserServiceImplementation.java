@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -63,7 +64,7 @@ public class UserServiceImplementation implements UserService {
             User user = optionalUser.get();
             user.setFirstname(userResponseDto.getFirstname());
             user.setLastname(userResponseDto.getLastname());
-            if (userRepository.findByEmail(userResponseDto.getEmail()).isEmpty() && user.getEmail() != userResponseDto.getEmail()){
+            if (userRepository.findByEmail(userResponseDto.getEmail()).isEmpty() && !Objects.equals(user.getEmail(), userResponseDto.getEmail())){
                 user.setEmail(userResponseDto.getEmail());
             }else {
                 throw new IllegalStateException("Email is taken!");
@@ -87,6 +88,16 @@ public class UserServiceImplementation implements UserService {
         return AuthenticationResponseDto.builder()
                 .token(jwtToken)
                 .build();
+    }
+
+    @Override
+    public String deleteById(Integer id) {
+        if (userRepository.findById(id).isEmpty()){
+            return "User not found with id: " + id;
+        }else {
+            userRepository.deleteById(id);
+            return "Successfully deleted user with id: " + id;
+        }
     }
 
     public User dtoToEntity(UserRegisterDto userRegisterDto) {

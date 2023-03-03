@@ -14,4 +14,5 @@ public interface UserService {
     List<UserResponseDto> findAll();
     UserResponseDto update(Integer id, UserResponseDto userResponseDto);
     AuthenticationResponseDto authenticate(LoginRequestDto request);
+    String deleteById(Integer id);
 }
