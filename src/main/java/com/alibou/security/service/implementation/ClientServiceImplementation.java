@@ -1,6 +1,7 @@
 package com.alibou.security.service.implementation;
 
 import com.alibou.security.dto.ClientDto;
+import com.alibou.security.dto.UserResponseDto;
 import com.alibou.security.model.Client;
 import com.alibou.security.model.User;
 import com.alibou.security.repository.ClientRepository;
@@ -11,8 +12,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,12 +35,15 @@ public class ClientServiceImplementation implements ClientService {
 
     @Override
     public Optional<ClientDto> findById(Integer id) {
-        return Optional.empty();
+        return Optional.ofNullable(clientRepository.findById(id)
+                .map(this::convertToResponseDto).orElseThrow(() ->
+                        new UsernameNotFoundException("Client not found with id: " + id)));
     }
 
     @Override
     public List<ClientDto> findAll() {
-        return null;
+        List<Client> clients = clientRepository.findAll();
+        return convertToResponseDto(clients);
     }
 
     @Override
@@ -64,5 +70,18 @@ public class ClientServiceImplementation implements ClientService {
         Integer userId = client.getUser().getId();
         clientDto.setUserId(userId);
         return clientDto;
+    }
+    public List<ClientDto> convertToResponseDto(List<Client> clients) {
+        List<ClientDto> clientDtoList = new ArrayList<>();
+        for (Client client : clients){
+            ClientDto clientDto = new ClientDto();
+            clientDto.setFirstname(client.getFirstname());
+            clientDto.setLastname(client.getLastname());
+            clientDto.setEmail(client.getEmail());
+            Integer userId = client.getUser().getId();
+            clientDto.setUserId(userId);
+            clientDtoList.add(clientDto);
+        }
+        return clientDtoList;
     }
 }
