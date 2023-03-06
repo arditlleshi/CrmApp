@@ -16,7 +16,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/operator/clients")
 @RequiredArgsConstructor
-public class OperatorClientController {
+public class ClientController {
     private final ClientService clientService;
     @PostMapping
     public ResponseEntity<ClientDto> create(@RequestBody UserClientDto userClientDto, @AuthenticationPrincipal UserDetails userDetails) {

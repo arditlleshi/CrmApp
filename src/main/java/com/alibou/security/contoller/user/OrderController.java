@@ -15,7 +15,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/operator/orders")
 @RequiredArgsConstructor
-public class UserOrderController {
+public class OrderController {
     private final OrderService orderService;
     @PostMapping
     public ResponseEntity<OrderResponseDto> create(@RequestBody OrderDto orderDto, @AuthenticationPrincipal UserDetails userDetails) throws IllegalAccessException {
