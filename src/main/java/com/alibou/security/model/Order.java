@@ -1,9 +1,6 @@
 package com.alibou.security.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,15 +16,17 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "products")
-public class Product {
+@Entity(name = "orders")
+public class Order {
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(nullable = false, unique = true, updatable = false)
     private Integer id;
-    private String name;
-    private Double price;
-    private String unit;
+    private Double amount;
+    @ManyToOne
+    private User user;
+    @ManyToOne
+    private Client client;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp

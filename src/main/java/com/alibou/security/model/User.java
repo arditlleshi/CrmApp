@@ -20,7 +20,7 @@ import static jakarta.persistence.FetchType.EAGER;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Entity(name = "users")
 public class User extends Person implements UserDetails {
     private String password;
     @ManyToMany(fetch = EAGER)

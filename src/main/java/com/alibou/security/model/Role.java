@@ -10,7 +10,7 @@ import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Data
-@Entity
+@Entity(name = "roles")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Role {
