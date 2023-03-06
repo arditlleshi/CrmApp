@@ -1,6 +1,7 @@
 package com.alibou.security.service.implementation;
 
 import com.alibou.security.dto.ClientDto;
+import com.alibou.security.dto.UserClientDto;
 import com.alibou.security.model.Client;
 import com.alibou.security.model.User;
 import com.alibou.security.repository.ClientRepository;
@@ -8,6 +9,7 @@ import com.alibou.security.repository.UserRepository;
 import com.alibou.security.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,21 @@ public class ClientServiceImplementation implements ClientService {
             throw new IllegalStateException("Email is already taken!");
         }
         Client client = dtoToEntity(clientDto);
+        clientRepository.save(client);
+        return convertToResponseDto(client);
+    }
+
+    @Override
+    public ClientDto create(UserClientDto userClientDto, UserDetails userDetails) {
+        if (clientRepository.findByEmail(userClientDto.getEmail()).isPresent()){
+            throw new IllegalStateException("Email is already taken!");
+        }
+        Client client = new Client();
+        client.setFirstname(userClientDto.getFirstname());
+        client.setLastname(userClientDto.getLastname());
+        client.setEmail(userClientDto.getEmail());
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        client.setUser(user);
         clientRepository.save(client);
         return convertToResponseDto(client);
     }

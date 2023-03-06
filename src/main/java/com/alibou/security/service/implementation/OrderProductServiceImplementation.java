@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,14 +48,30 @@ public class OrderProductServiceImplementation implements OrderProductService {
 
     @Override
     public Optional<OrderProductResponseDto> findById(Integer id) {
-        return Optional.empty();
+        return Optional.ofNullable(orderProductRepository.findById(id)
+                .map(this::convertToResponseDto).orElseThrow(() ->
+                        new IllegalStateException("Order-Product not found with id: " + id)));
     }
 
     @Override
     public List<OrderProductResponseDto> findAll() {
-        return null;
+        List<OrderProduct> orderProducts = orderProductRepository.findAll();
+        return convertToResponseDto(orderProducts);
     }
     private OrderProductResponseDto convertToResponseDto(OrderProduct orderProduct){
         return mapper.map(orderProduct, OrderProductResponseDto.class);
+    }
+    private List<OrderProductResponseDto> convertToResponseDto(List<OrderProduct> orderProducts){
+        List<OrderProductResponseDto> orderProductResponseDtoList = new ArrayList<>();
+        for (OrderProduct orderProduct : orderProducts){
+            OrderProductResponseDto orderProductResponseDto = new OrderProductResponseDto();
+            orderProductResponseDto.setId(orderProduct.getId());
+            orderProductResponseDto.setProductId(orderProduct.getProduct().getId());
+            orderProductResponseDto.setOrderId(orderProduct.getOrder().getId());
+            orderProductResponseDto.setQuantity(orderProduct.getQuantity());
+            orderProductResponseDto.setAmount(orderProduct.getAmount());
+            orderProductResponseDtoList.add(orderProductResponseDto);
+        }
+        return orderProductResponseDtoList;
     }
 }

@@ -1,4 +1,4 @@
-package com.alibou.security.contoller;
+package com.alibou.security.contoller.user;
 
 import com.alibou.security.dto.ClientDto;
 import com.alibou.security.dto.UserClientDto;
@@ -13,16 +13,11 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/admin/clients")
+@RequestMapping("/api/operator/clients")
 @RequiredArgsConstructor
-public class ClientController {
+public class OperatorClientController {
     private final ClientService clientService;
-
-    @PostMapping("/create")
-    public ResponseEntity<ClientDto> create(@RequestBody ClientDto clientDto) {
-        return ResponseEntity.ok(clientService.create(clientDto));
-    }
-    @PostMapping("/user/create")
+    @PostMapping
     public ResponseEntity<ClientDto> create(@RequestBody UserClientDto userClientDto, @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(clientService.create(userClientDto, userDetails));
     }
@@ -36,7 +31,7 @@ public class ClientController {
         List<ClientDto> clientDtoList = clientService.findAll();
         return ResponseEntity.ok(clientDtoList);
     }
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ClientDto> update(@PathVariable("id") Integer id, @RequestBody ClientDto clientDto){
         return ResponseEntity.ok(clientService.update(id, clientDto));
     }
