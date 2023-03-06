@@ -64,7 +64,7 @@ public class UserServiceImplementation implements UserService {
             User user = optionalUser.get();
             user.setFirstname(userResponseDto.getFirstname());
             user.setLastname(userResponseDto.getLastname());
-            if (userRepository.findByEmail(userResponseDto.getEmail()).isEmpty() && !Objects.equals(user.getEmail(), userResponseDto.getEmail())){
+            if (userRepository.findByEmail(userResponseDto.getEmail()).isEmpty() || Objects.equals(user.getEmail(), userResponseDto.getEmail())){
                 user.setEmail(userResponseDto.getEmail());
             }else {
                 throw new IllegalStateException("Email is taken!");

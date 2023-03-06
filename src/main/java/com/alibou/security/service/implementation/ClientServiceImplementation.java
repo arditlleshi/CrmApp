@@ -1,7 +1,6 @@
 package com.alibou.security.service.implementation;
 
 import com.alibou.security.dto.ClientDto;
-import com.alibou.security.dto.UserResponseDto;
 import com.alibou.security.model.Client;
 import com.alibou.security.model.User;
 import com.alibou.security.repository.ClientRepository;
@@ -14,8 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,12 +47,30 @@ public class ClientServiceImplementation implements ClientService {
 
     @Override
     public ClientDto update(Integer id, ClientDto clientDto) {
-        return null;
+        Optional<Client> optionalClient = clientRepository.findById(id);
+        if (optionalClient.isPresent()){
+            Client client = optionalClient.get();
+            client.setFirstname(clientDto.getFirstname());
+            client.setLastname(clientDto.getLastname());
+            if (clientRepository.findByEmail(clientDto.getEmail()).isEmpty() || Objects.equals(client.getEmail(), clientDto.getEmail())){
+                client.setEmail(clientDto.getEmail());
+            }else {
+                throw new IllegalStateException("Email is taken!");
+            }
+            clientRepository.save(client);
+            return convertToResponseDto(client);
+        }else {
+            throw new UsernameNotFoundException("Client not found with id: " + id);
+        }
     }
-
     @Override
     public String deleteById(Integer id) {
-        return null;
+        if (clientRepository.findById(id).isEmpty()){
+            return "Client not found with id: " + id;
+        }else {
+            clientRepository.deleteById(id);
+            return "Successfully deleted user with id: " + id;
+        }
     }
     public Client dtoToEntity(ClientDto clientDto) {
         Client client = new Client();
@@ -75,6 +92,7 @@ public class ClientServiceImplementation implements ClientService {
         List<ClientDto> clientDtoList = new ArrayList<>();
         for (Client client : clients){
             ClientDto clientDto = new ClientDto();
+            clientDto.setId(client.getId());
             clientDto.setFirstname(client.getFirstname());
             clientDto.setLastname(client.getLastname());
             clientDto.setEmail(client.getEmail());

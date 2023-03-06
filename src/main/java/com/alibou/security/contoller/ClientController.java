@@ -15,11 +15,10 @@ import java.util.Optional;
 public class ClientController {
     private final ClientService clientService;
 
-    @PostMapping("/register")
+    @PostMapping("/create")
     public ResponseEntity<ClientDto> create(@RequestBody ClientDto clientDto) {
         return ResponseEntity.ok(clientService.create(clientDto));
     }
-
     @GetMapping("/{id}")
     public ResponseEntity<ClientDto> findById(@PathVariable("id") Integer id){
         Optional<ClientDto> clientDto = clientService.findById(id);
@@ -29,5 +28,13 @@ public class ClientController {
     public ResponseEntity<List<ClientDto>> findAll(){
         List<ClientDto> clientDtoList = clientService.findAll();
         return ResponseEntity.ok(clientDtoList);
+    }
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ClientDto> update(@PathVariable("id") Integer id, @RequestBody ClientDto clientDto){
+        return ResponseEntity.ok(clientService.update(id, clientDto));
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteById(@PathVariable("id") Integer id){
+        return ResponseEntity.ok(clientService.deleteById(id));
     }
 }

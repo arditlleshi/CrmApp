@@ -35,7 +35,7 @@ public class UserController {
         List<UserResponseDto> userResponseDtoList = userService.findAll();
         return ResponseEntity.ok(userResponseDtoList);
     }
-    @PostMapping("/update/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<UserResponseDto> update(@PathVariable("id") Integer id, @RequestBody UserResponseDto userResponseDto){
         return ResponseEntity.ok(userService.update(id, userResponseDto));
     }
