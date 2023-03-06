@@ -13,10 +13,8 @@ public interface ClientService {
     Optional<ClientDto> findById(Integer id);
     List<ClientDto> findAll();
     ClientDto update(Integer id, ClientDto ClientDto);
-    String deleteById(Integer id);
     ClientDto create(UserClientDto userClientDto, UserDetails userDetails);
     Optional<ClientDto> findById(Integer id, UserDetails userDetails) throws AccessDeniedException;
     List<ClientDto> findAll(UserDetails userDetails);
-    ClientDto update(Integer id, ClientDto ClientDto, UserDetails userDetails);
-    String deleteById(Integer id, UserDetails userDetails);
+    ClientDto update(Integer id, ClientDto ClientDto, UserDetails userDetails) throws AccessDeniedException;
 }

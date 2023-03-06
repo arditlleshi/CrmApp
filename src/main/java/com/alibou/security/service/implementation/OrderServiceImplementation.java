@@ -2,13 +2,16 @@ package com.alibou.security.service.implementation;
 
 import com.alibou.security.dto.OrderDto;
 import com.alibou.security.dto.OrderResponseDto;
+import com.alibou.security.model.Client;
 import com.alibou.security.model.Order;
+import com.alibou.security.model.User;
 import com.alibou.security.repository.ClientRepository;
 import com.alibou.security.repository.OrderRepository;
 import com.alibou.security.repository.UserRepository;
 import com.alibou.security.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +50,41 @@ public class OrderServiceImplementation implements OrderService {
         List<Order> orders = orderRepository.findAll();
         return convertToResponseDto(orders);
     }
+
+    @Override
+    public OrderResponseDto create(OrderDto orderDto, UserDetails userDetails) throws IllegalAccessException {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        Client client = clientRepository.findById(orderDto.getClientId()).orElseThrow();
+        Order order = new Order();
+        if (!client.getUser().equals(user)){
+            throw new IllegalAccessException("You can't assign this client to the order!");
+        }
+        order.setUser(user);
+        order.setClient(client);
+        order.setAmount(0.0);
+        orderRepository.save(order);
+        return convertToResponseDto(order);
+    }
+
+    @Override
+    public Optional<OrderResponseDto> findById(Integer id, UserDetails userDetails) throws IllegalAccessException {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new IllegalStateException("Order not found with id: " + id)
+        );
+        if (!order.getUser().equals(user)){
+            throw new IllegalAccessException("You can't view this order!");
+        }
+        return Optional.of(convertToResponseDto(order));
+    }
+
+    @Override
+    public List<OrderResponseDto> findAll(UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        List<Order> orders = orderRepository.findAllByUser(user);
+        return convertToResponseDto(orders);
+    }
+
     private OrderResponseDto convertToResponseDto(Order order){
         return mapper.map(order, OrderResponseDto.class);
     }

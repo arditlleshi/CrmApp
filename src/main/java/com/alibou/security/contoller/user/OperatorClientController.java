@@ -33,11 +33,7 @@ public class OperatorClientController {
         return ResponseEntity.ok(clientDtoList);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<ClientDto> update(@PathVariable("id") Integer id, @RequestBody ClientDto clientDto){
-        return ResponseEntity.ok(clientService.update(id, clientDto));
-    }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable("id") Integer id){
-        return ResponseEntity.ok(clientService.deleteById(id));
+    public ResponseEntity<ClientDto> update(@PathVariable("id") Integer id, @RequestBody ClientDto clientDto, @AuthenticationPrincipal UserDetails userDetails) throws AccessDeniedException {
+        return ResponseEntity.ok(clientService.update(id, clientDto, userDetails));
     }
 }

@@ -33,8 +33,4 @@ public class ClientController {
     public ResponseEntity<ClientDto> update(@PathVariable("id") Integer id, @RequestBody ClientDto clientDto){
         return ResponseEntity.ok(clientService.update(id, clientDto));
     }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable("id") Integer id){
-        return ResponseEntity.ok(clientService.deleteById(id));
-    }
 }
