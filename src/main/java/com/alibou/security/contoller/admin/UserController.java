@@ -1,4 +1,4 @@
-package com.alibou.security.contoller;
+package com.alibou.security.contoller.admin;
 
 import com.alibou.security.dto.AuthenticationResponseDto;
 import com.alibou.security.dto.LoginRequestDto;
@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    @PostMapping("/register")
+    @PostMapping
     public ResponseEntity<UserResponseDto> register(@RequestBody UserRegisterDto request){
         return ResponseEntity.ok(userService.create(request));
     }
@@ -35,7 +35,7 @@ public class UserController {
         List<UserResponseDto> userResponseDtoList = userService.findAll();
         return ResponseEntity.ok(userResponseDtoList);
     }
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> update(@PathVariable("id") Integer id, @RequestBody UserResponseDto userResponseDto){
         return ResponseEntity.ok(userService.update(id, userResponseDto));
     }

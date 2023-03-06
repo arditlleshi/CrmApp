@@ -1,12 +1,9 @@
-package com.alibou.security.contoller;
+package com.alibou.security.contoller.admin;
 
 import com.alibou.security.dto.ClientDto;
-import com.alibou.security.dto.UserClientDto;
 import com.alibou.security.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,13 +15,9 @@ import java.util.Optional;
 public class ClientController {
     private final ClientService clientService;
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<ClientDto> create(@RequestBody ClientDto clientDto) {
         return ResponseEntity.ok(clientService.create(clientDto));
-    }
-    @PostMapping("/user/create")
-    public ResponseEntity<ClientDto> create(@RequestBody UserClientDto userClientDto, @AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(clientService.create(userClientDto, userDetails));
     }
     @GetMapping("/{id}")
     public ResponseEntity<ClientDto> findById(@PathVariable("id") Integer id){
@@ -36,7 +29,7 @@ public class ClientController {
         List<ClientDto> clientDtoList = clientService.findAll();
         return ResponseEntity.ok(clientDtoList);
     }
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ClientDto> update(@PathVariable("id") Integer id, @RequestBody ClientDto clientDto){
         return ResponseEntity.ok(clientService.update(id, clientDto));
     }

@@ -1,4 +1,4 @@
-package com.alibou.security.contoller;
+package com.alibou.security.contoller.admin;
 
 import com.alibou.security.dto.ProductDto;
 import com.alibou.security.service.ProductService;
@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/products")
+@RequestMapping("/api/admin/products")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<ProductDto> create(@RequestBody ProductDto productDto) {
         return ResponseEntity.ok(productService.create(productDto));
     }
@@ -28,7 +28,7 @@ public class ProductController {
         List<ProductDto> productDtoList = productService.findAll();
         return ResponseEntity.ok(productDtoList);
     }
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ProductDto> update(@PathVariable("id") Integer id, @RequestBody ProductDto productDto){
         return ResponseEntity.ok(productService.update(id, productDto));
     }

@@ -1,4 +1,4 @@
-package com.alibou.security.contoller;
+package com.alibou.security.contoller.admin;
 
 import com.alibou.security.dto.OrderProductDto;
 import com.alibou.security.dto.OrderProductResponseDto;
@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/v1/order-product")
+@RequestMapping("/api/admin/order-product")
 @RequiredArgsConstructor
 public class OrderProductController {
     private final OrderProductService orderProductService;
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<OrderProductResponseDto> create(@RequestBody OrderProductDto orderProductDto) {
         return ResponseEntity.ok(orderProductService.create(orderProductDto));
     }

@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -30,21 +31,6 @@ public class ClientServiceImplementation implements ClientService {
             throw new IllegalStateException("Email is already taken!");
         }
         Client client = dtoToEntity(clientDto);
-        clientRepository.save(client);
-        return convertToResponseDto(client);
-    }
-
-    @Override
-    public ClientDto create(UserClientDto userClientDto, UserDetails userDetails) {
-        if (clientRepository.findByEmail(userClientDto.getEmail()).isPresent()){
-            throw new IllegalStateException("Email is already taken!");
-        }
-        Client client = new Client();
-        client.setFirstname(userClientDto.getFirstname());
-        client.setLastname(userClientDto.getLastname());
-        client.setEmail(userClientDto.getEmail());
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
-        client.setUser(user);
         clientRepository.save(client);
         return convertToResponseDto(client);
     }
@@ -88,6 +74,48 @@ public class ClientServiceImplementation implements ClientService {
             clientRepository.deleteById(id);
             return "Successfully deleted user with id: " + id;
         }
+    }
+    @Override
+    public ClientDto create(UserClientDto userClientDto, UserDetails userDetails) {
+        if (clientRepository.findByEmail(userClientDto.getEmail()).isPresent()){
+            throw new IllegalStateException("Email is already taken!");
+        }
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        Client client = new Client();
+        client.setFirstname(userClientDto.getFirstname());
+        client.setLastname(userClientDto.getLastname());
+        client.setEmail(userClientDto.getEmail());
+        client.setUser(user);
+        clientRepository.save(client);
+        return convertToResponseDto(client);
+    }
+    @Override
+    public Optional<ClientDto> findById(Integer id, UserDetails userDetails) throws AccessDeniedException {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        Client client = clientRepository.findById(id).orElseThrow(
+                () -> new IllegalStateException("Client not found with id: " + id)
+        );
+        if (!client.getUser().equals(user)){
+            throw new AccessDeniedException("You don't have access to view client with id: " + id);
+        }
+        return Optional.of(convertToResponseDto(client));
+    }
+
+    @Override
+    public List<ClientDto> findAll(UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        List<Client> clients = clientRepository.findAllByUser(user);
+        return convertToResponseDto(clients);
+    }
+
+    @Override
+    public ClientDto update(Integer id, ClientDto ClientDto, UserDetails userDetails) {
+        return null;
+    }
+
+    @Override
+    public String deleteById(Integer id, UserDetails userDetails) {
+        return null;
     }
     public Client dtoToEntity(ClientDto clientDto) {
         Client client = new Client();

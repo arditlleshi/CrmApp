@@ -1,4 +1,4 @@
-package com.alibou.security.contoller;
+package com.alibou.security.contoller.admin;
 
 import com.alibou.security.model.Role;
 import com.alibou.security.service.RoleService;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/auth/role")
+@RequestMapping("/api/admin/role")
 @RequiredArgsConstructor
 public class RoleController {
     private final RoleService roleService;

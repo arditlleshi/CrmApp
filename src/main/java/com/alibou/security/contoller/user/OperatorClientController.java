@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,13 +23,13 @@ public class OperatorClientController {
         return ResponseEntity.ok(clientService.create(userClientDto, userDetails));
     }
     @GetMapping("/{id}")
-    public ResponseEntity<ClientDto> findById(@PathVariable("id") Integer id){
-        Optional<ClientDto> clientDto = clientService.findById(id);
-        return clientDto.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ClientDto> findById(@PathVariable("id") Integer id, @AuthenticationPrincipal UserDetails userDetails) throws AccessDeniedException {
+        Optional<ClientDto> clientDto = clientService.findById(id, userDetails);
+        return clientDto.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
     @GetMapping
-    public ResponseEntity<List<ClientDto>> findAll(){
-        List<ClientDto> clientDtoList = clientService.findAll();
+    public ResponseEntity<List<ClientDto>> findAll(@AuthenticationPrincipal UserDetails userDetails){
+        List<ClientDto> clientDtoList = clientService.findAll(userDetails);
         return ResponseEntity.ok(clientDtoList);
     }
     @PutMapping("/{id}")
