@@ -17,11 +17,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    @PostMapping
+    @PostMapping("/all/create")
     public ResponseEntity<UserResponseDto> register(@RequestBody UserRegisterDto request){
         return ResponseEntity.ok(userService.create(request));
     }
-    @PostMapping("/authenticate")
+    @PostMapping("/all/authenticate")
     public ResponseEntity<AuthenticationResponseDto> authenticate(@RequestBody LoginRequestDto request){
         return ResponseEntity.ok(userService.authenticate(request));
     }

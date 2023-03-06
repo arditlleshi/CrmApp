@@ -5,6 +5,7 @@ import com.alibou.security.dto.OrderProductResponseDto;
 import com.alibou.security.service.OrderProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/admin/order-product")
 @RequiredArgsConstructor
+@Component("adminOrderProductController")
 public class OrderProductController {
     private final OrderProductService orderProductService;
     @PostMapping

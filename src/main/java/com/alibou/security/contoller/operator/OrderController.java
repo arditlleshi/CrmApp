@@ -1,4 +1,4 @@
-package com.alibou.security.contoller.user;
+package com.alibou.security.contoller.operator;
 
 import com.alibou.security.dto.OrderDto;
 import com.alibou.security.dto.OrderResponseDto;
@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/operator/orders")
 @RequiredArgsConstructor
+@Component("operatorOrderController")
 public class OrderController {
     private final OrderService orderService;
     @PostMapping

@@ -1,4 +1,4 @@
-package com.alibou.security.contoller.user;
+package com.alibou.security.contoller.operator;
 
 import com.alibou.security.dto.ClientDto;
 import com.alibou.security.dto.UserClientDto;
@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
@@ -16,6 +17,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/operator/clients")
 @RequiredArgsConstructor
+@Component("operatorClientController")
 public class ClientController {
     private final ClientService clientService;
     @PostMapping

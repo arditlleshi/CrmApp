@@ -4,6 +4,7 @@ import com.alibou.security.dto.ClientDto;
 import com.alibou.security.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/admin/clients")
 @RequiredArgsConstructor
+@Component("adminClientController")
 public class ClientController {
     private final ClientService clientService;
 
