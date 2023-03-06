@@ -4,6 +4,7 @@ import com.alibou.security.dto.ClientDto;
 import com.alibou.security.dto.UserClientDto;
 import com.alibou.security.service.ClientService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -32,6 +33,11 @@ public class ClientController {
     @GetMapping
     public ResponseEntity<List<ClientDto>> findAll(@AuthenticationPrincipal UserDetails userDetails){
         List<ClientDto> clientDtoList = clientService.findAll(userDetails);
+        return ResponseEntity.ok(clientDtoList);
+    }
+    @GetMapping("/{pageNumber}/{pageSize}")
+    public ResponseEntity<Page<ClientDto>> findAllWithPagination(@PathVariable Integer pageNumber, @PathVariable Integer pageSize, @AuthenticationPrincipal UserDetails userDetails){
+        Page<ClientDto> clientDtoList = clientService.findAll(pageNumber, pageSize, userDetails);
         return ResponseEntity.ok(clientDtoList);
     }
     @PutMapping("/{id}")

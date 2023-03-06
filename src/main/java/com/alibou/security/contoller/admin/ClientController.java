@@ -3,6 +3,7 @@ package com.alibou.security.contoller.admin;
 import com.alibou.security.dto.ClientDto;
 import com.alibou.security.service.ClientService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,11 @@ public class ClientController {
     @GetMapping
     public ResponseEntity<List<ClientDto>> findAll(){
         List<ClientDto> clientDtoList = clientService.findAll();
+        return ResponseEntity.ok(clientDtoList);
+    }
+    @GetMapping("/{pageNumber}/{pageSize}")
+    public ResponseEntity<Page<ClientDto>> findAllWithPagination(@PathVariable Integer pageNumber, @PathVariable Integer pageSize){
+        Page<ClientDto> clientDtoList = clientService.findAll(pageNumber, pageSize);
         return ResponseEntity.ok(clientDtoList);
     }
     @PutMapping("/{id}")

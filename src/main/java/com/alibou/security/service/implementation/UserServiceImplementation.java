@@ -12,6 +12,10 @@ import com.alibou.security.security.JwtService;
 import com.alibou.security.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -54,6 +58,12 @@ public class UserServiceImplementation implements UserService {
     @Override
     public List<UserResponseDto> findAll() {
         List<User> users = userRepository.findAll();
+        return convertToResponseDto(users);
+    }
+    @Override
+    public Page<UserResponseDto> findAll(Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<User> users = userRepository.findAll(pageable);
         return convertToResponseDto(users);
     }
 
@@ -116,7 +126,7 @@ public class UserServiceImplementation implements UserService {
         responseDto.setRoleNames(roleNames);
         return responseDto;
     }
-    public List<UserResponseDto> convertToResponseDto(List<User> userList) {
+    private List<UserResponseDto> convertToResponseDto(List<User> userList) {
         List<UserResponseDto> userResponseDtoList = new ArrayList<>();
         for (User user : userList) {
             UserResponseDto userResponseDto = new UserResponseDto();
@@ -131,5 +141,21 @@ public class UserServiceImplementation implements UserService {
             userResponseDtoList.add(userResponseDto);
         }
         return userResponseDtoList;
+    }
+    private Page<UserResponseDto> convertToResponseDto(Page<User> users){
+        List<UserResponseDto> userResponseDtoList = new ArrayList<>();
+        for (User user : users.getContent()){
+            UserResponseDto userResponseDto = new UserResponseDto();
+            userResponseDto.setId(user.getId());
+            userResponseDto.setFirstname(user.getFirstname());
+            userResponseDto.setLastname(user.getLastname());
+            userResponseDto.setEmail(user.getEmail());
+            List<String> roleNames = user.getRoles().stream()
+                    .map(role -> role.getName().toString())
+                    .toList();
+            userResponseDto.setRoleNames(roleNames);
+            userResponseDtoList.add(userResponseDto);
+        }
+        return new PageImpl<>(userResponseDtoList, users.getPageable(), users.getTotalElements());
     }
 }

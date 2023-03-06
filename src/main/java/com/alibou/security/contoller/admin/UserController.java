@@ -6,6 +6,7 @@ import com.alibou.security.dto.UserRegisterDto;
 import com.alibou.security.dto.UserResponseDto;
 import com.alibou.security.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,11 @@ public class UserController {
     public ResponseEntity<UserResponseDto> findById(@PathVariable("id") Integer id){
         Optional<UserResponseDto> userResponseDto = userService.findById(id);
         return userResponseDto.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+    @GetMapping("/{pageNumber}/{pageSize}")
+    public ResponseEntity<Page<UserResponseDto>> findAllWithPagination(@PathVariable Integer pageNumber, @PathVariable Integer pageSize){
+        Page<UserResponseDto> userResponseDtoPage = userService.findAll(pageNumber, pageSize);
+        return ResponseEntity.ok(userResponseDtoPage);
     }
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> findAll(){

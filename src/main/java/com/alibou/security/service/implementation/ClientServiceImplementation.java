@@ -9,6 +9,10 @@ import com.alibou.security.repository.UserRepository;
 import com.alibou.security.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -47,6 +51,13 @@ public class ClientServiceImplementation implements ClientService {
     @Override
     public List<ClientDto> findAll() {
         List<Client> clients = clientRepository.findAll();
+        return convertToResponseDto(clients);
+    }
+
+    @Override
+    public Page<ClientDto> findAll(Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Client> clients = clientRepository.findAll(pageable);
         return convertToResponseDto(clients);
     }
 
@@ -100,6 +111,13 @@ public class ClientServiceImplementation implements ClientService {
         List<Client> clients = clientRepository.findAllByUser(user);
         return convertToResponseDto(clients);
     }
+    @Override
+    public Page<ClientDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Client> clients = clientRepository.findAllByUser(user, pageable);
+        return convertToResponseDto(clients);
+    }
 
     @Override
     public ClientDto update(Integer id, ClientDto clientDto, UserDetails userDetails) throws AccessDeniedException {
@@ -131,13 +149,13 @@ public class ClientServiceImplementation implements ClientService {
         client.setUser(user);
         return client;
     }
-    public ClientDto convertToResponseDto(Client client) {
+    private ClientDto convertToResponseDto(Client client) {
         ClientDto clientDto = mapper.map(client, ClientDto.class);
         Integer userId = client.getUser().getId();
         clientDto.setUserId(userId);
         return clientDto;
     }
-    public List<ClientDto> convertToResponseDto(List<Client> clients) {
+    private List<ClientDto> convertToResponseDto(List<Client> clients) {
         List<ClientDto> clientDtoList = new ArrayList<>();
         for (Client client : clients){
             ClientDto clientDto = new ClientDto();
@@ -150,5 +168,19 @@ public class ClientServiceImplementation implements ClientService {
             clientDtoList.add(clientDto);
         }
         return clientDtoList;
+    }
+    private Page<ClientDto> convertToResponseDto(Page<Client> clients){
+        List<ClientDto> clientDtoList = new ArrayList<>();
+        for (Client client : clients.getContent()){
+            ClientDto clientDto = new ClientDto();
+            clientDto.setId(client.getId());
+            clientDto.setFirstname(client.getFirstname());
+            clientDto.setLastname(client.getLastname());
+            clientDto.setEmail(client.getEmail());
+            Integer userId = client.getUser().getId();
+            clientDto.setUserId(userId);
+            clientDtoList.add(clientDto);
+        }
+        return new PageImpl<>(clientDtoList, clients.getPageable(), clients.getTotalElements());
     }
 }
