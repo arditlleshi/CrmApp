@@ -3,6 +3,7 @@ package com.alibou.security.contoller.admin;
 import com.alibou.security.dto.ProductDto;
 import com.alibou.security.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +27,11 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<List<ProductDto>> findAll(){
         List<ProductDto> productDtoList = productService.findAll();
+        return ResponseEntity.ok(productDtoList);
+    }
+    @GetMapping("/{pageNumber}/{pageSize}")
+    public ResponseEntity<Page<ProductDto>> findAll(@PathVariable Integer pageNumber, @PathVariable Integer pageSize){
+        Page<ProductDto> productDtoList = productService.findAll(pageNumber, pageSize);
         return ResponseEntity.ok(productDtoList);
     }
     @PutMapping("/{id}")

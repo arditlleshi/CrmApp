@@ -36,7 +36,7 @@ public class ClientController {
         return ResponseEntity.ok(clientDtoList);
     }
     @GetMapping("/{pageNumber}/{pageSize}")
-    public ResponseEntity<Page<ClientDto>> findAllWithPagination(@PathVariable Integer pageNumber, @PathVariable Integer pageSize, @AuthenticationPrincipal UserDetails userDetails){
+    public ResponseEntity<Page<ClientDto>> findAll(@PathVariable Integer pageNumber, @PathVariable Integer pageSize, @AuthenticationPrincipal UserDetails userDetails){
         Page<ClientDto> clientDtoList = clientService.findAll(pageNumber, pageSize, userDetails);
         return ResponseEntity.ok(clientDtoList);
     }

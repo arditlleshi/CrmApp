@@ -4,6 +4,7 @@ import com.alibou.security.dto.OrderProductDto;
 import com.alibou.security.dto.OrderProductResponseDto;
 import com.alibou.security.service.OrderProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,6 +32,11 @@ public class OrderProductController {
     @GetMapping
     public ResponseEntity<List<OrderProductResponseDto>> findAll(@AuthenticationPrincipal UserDetails userDetails){
         List<OrderProductResponseDto> orderProductResponseDtoList = orderProductService.findAll(userDetails);
+        return ResponseEntity.ok(orderProductResponseDtoList);
+    }
+    @GetMapping("/{pageNumber}/{pageSize}")
+    public ResponseEntity<Page<OrderProductResponseDto>> findAll(@PathVariable Integer pageNumber, @PathVariable Integer pageSize, @AuthenticationPrincipal UserDetails userDetails){
+        Page<OrderProductResponseDto> orderProductResponseDtoList = orderProductService.findAll(pageNumber, pageSize, userDetails);
         return ResponseEntity.ok(orderProductResponseDtoList);
     }
 }

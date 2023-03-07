@@ -31,15 +31,15 @@ public class UserController {
         Optional<UserResponseDto> userResponseDto = userService.findById(id);
         return userResponseDto.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
-    @GetMapping("/{pageNumber}/{pageSize}")
-    public ResponseEntity<Page<UserResponseDto>> findAllWithPagination(@PathVariable Integer pageNumber, @PathVariable Integer pageSize){
-        Page<UserResponseDto> userResponseDtoPage = userService.findAll(pageNumber, pageSize);
-        return ResponseEntity.ok(userResponseDtoPage);
-    }
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> findAll(){
         List<UserResponseDto> userResponseDtoList = userService.findAll();
         return ResponseEntity.ok(userResponseDtoList);
+    }
+    @GetMapping("/{pageNumber}/{pageSize}")
+    public ResponseEntity<Page<UserResponseDto>> findAll(@PathVariable Integer pageNumber, @PathVariable Integer pageSize){
+        Page<UserResponseDto> userResponseDtoPage = userService.findAll(pageNumber, pageSize);
+        return ResponseEntity.ok(userResponseDtoPage);
     }
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> update(@PathVariable("id") Integer id, @RequestBody UserResponseDto userResponseDto){

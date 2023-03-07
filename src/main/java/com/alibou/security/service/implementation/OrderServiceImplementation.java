@@ -11,6 +11,10 @@ import com.alibou.security.repository.UserRepository;
 import com.alibou.security.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -52,6 +56,13 @@ public class OrderServiceImplementation implements OrderService {
     }
 
     @Override
+    public Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Order> orders = orderRepository.findAll(pageable);
+        return convertToResponseDto(orders);
+    }
+
+    @Override
     public OrderResponseDto create(OrderDto orderDto, UserDetails userDetails) throws IllegalAccessException {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
         Client client = clientRepository.findById(orderDto.getClientId()).orElseThrow();
@@ -85,6 +96,14 @@ public class OrderServiceImplementation implements OrderService {
         return convertToResponseDto(orders);
     }
 
+    @Override
+    public Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Order> orders = orderRepository.findAllByUser(user, pageable);
+        return convertToResponseDto(orders);
+    }
+
     private OrderResponseDto convertToResponseDto(Order order){
         return mapper.map(order, OrderResponseDto.class);
     }
@@ -99,5 +118,17 @@ public class OrderServiceImplementation implements OrderService {
             orderResponseDtoList.add(orderResponseDto);
         }
         return orderResponseDtoList;
+    }
+    private Page<OrderResponseDto> convertToResponseDto(Page<Order> orders){
+        List<OrderResponseDto> orderResponseDtoList = new ArrayList<>();
+        for (Order order : orders){
+            OrderResponseDto orderResponseDto = new OrderResponseDto();
+            orderResponseDto.setId(order.getId());
+            orderResponseDto.setAmount(order.getAmount());
+            orderResponseDto.setUserId(order.getUser().getId());
+            orderResponseDto.setClientId(order.getClient().getId());
+            orderResponseDtoList.add(orderResponseDto);
+        }
+        return new PageImpl<>(orderResponseDtoList, orders.getPageable(), orders.getTotalElements());
     }
 }

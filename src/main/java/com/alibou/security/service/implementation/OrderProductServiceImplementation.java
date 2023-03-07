@@ -13,6 +13,10 @@ import com.alibou.security.repository.UserRepository;
 import com.alibou.security.service.OrderProductService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -64,6 +68,13 @@ public class OrderProductServiceImplementation implements OrderProductService {
     }
 
     @Override
+    public Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<OrderProduct> orderProducts = orderProductRepository.findAll(pageable);
+        return convertToResponseDto(orderProducts);
+    }
+
+    @Override
     public OrderProductResponseDto create(OrderProductDto orderProductDto, UserDetails userDetails) throws IllegalAccessException {
         OrderProduct orderProduct = new OrderProduct();
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
@@ -106,6 +117,14 @@ public class OrderProductServiceImplementation implements OrderProductService {
         return convertToResponseDto(orderProducts);
     }
 
+    @Override
+    public Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<OrderProduct> orderProducts = orderProductRepository.findByUserId(user.getId(), pageable);
+        return convertToResponseDto(orderProducts);
+    }
+
     private OrderProductResponseDto convertToResponseDto(OrderProduct orderProduct){
         return mapper.map(orderProduct, OrderProductResponseDto.class);
     }
@@ -121,5 +140,18 @@ public class OrderProductServiceImplementation implements OrderProductService {
             orderProductResponseDtoList.add(orderProductResponseDto);
         }
         return orderProductResponseDtoList;
+    }
+    private Page<OrderProductResponseDto> convertToResponseDto(Page<OrderProduct> orderProducts){
+        List<OrderProductResponseDto> orderProductResponseDtoList = new ArrayList<>();
+        for (OrderProduct orderProduct : orderProducts){
+            OrderProductResponseDto orderProductResponseDto = new OrderProductResponseDto();
+            orderProductResponseDto.setId(orderProduct.getId());
+            orderProductResponseDto.setProductId(orderProduct.getProduct().getId());
+            orderProductResponseDto.setOrderId(orderProduct.getOrder().getId());
+            orderProductResponseDto.setQuantity(orderProduct.getQuantity());
+            orderProductResponseDto.setAmount(orderProduct.getAmount());
+            orderProductResponseDtoList.add(orderProductResponseDto);
+        }
+        return new PageImpl<>(orderProductResponseDtoList, orderProducts.getPageable(), orderProducts.getTotalElements());
     }
 }

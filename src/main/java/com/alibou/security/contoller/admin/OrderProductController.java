@@ -4,6 +4,7 @@ import com.alibou.security.dto.OrderProductDto;
 import com.alibou.security.dto.OrderProductResponseDto;
 import com.alibou.security.service.OrderProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,11 @@ public class OrderProductController {
     @GetMapping
     public ResponseEntity<List<OrderProductResponseDto>> findAll(){
         List<OrderProductResponseDto> orderProductResponseDtoList = orderProductService.findAll();
+        return ResponseEntity.ok(orderProductResponseDtoList);
+    }
+    @GetMapping("/{pageNumber}/{pageSize}")
+    public ResponseEntity<Page<OrderProductResponseDto>> findAll(@PathVariable Integer pageNumber, @PathVariable Integer pageSize){
+        Page<OrderProductResponseDto> orderProductResponseDtoList = orderProductService.findAll(pageNumber, pageSize);
         return ResponseEntity.ok(orderProductResponseDtoList);
     }
 }
