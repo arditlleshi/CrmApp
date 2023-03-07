@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admin/clients")
@@ -24,8 +23,8 @@ public class ClientController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<ClientDto> findById(@PathVariable("id") Integer id){
-        Optional<ClientDto> clientDto = clientService.findById(id);
-        return clientDto.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        ClientDto clientDto = clientService.findById(id);
+        return ResponseEntity.ok(clientDto);
     }
     @GetMapping
     public ResponseEntity<List<ClientDto>> findAll(){

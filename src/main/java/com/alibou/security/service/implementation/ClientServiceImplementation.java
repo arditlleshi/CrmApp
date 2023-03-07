@@ -43,10 +43,10 @@ public class ClientServiceImplementation implements ClientService {
     }
 
     @Override
-    public Optional<ClientDto> findById(Integer id) {
-        return Optional.ofNullable(clientRepository.findById(id)
+    public ClientDto findById(Integer id) {
+        return clientRepository.findById(id)
                 .map(this::convertToResponseDto).orElseThrow(() ->
-                        new UsernameNotFoundException("Client not found with id: " + id)));
+                        new UsernameNotFoundException("Client not found with id: " + id));
     }
 
     @Override
@@ -105,7 +105,7 @@ public class ClientServiceImplementation implements ClientService {
         return convertToResponseDto(client);
     }
     @Override
-    public Optional<ClientDto> findById(Integer id, UserDetails userDetails) throws AccessDeniedException {
+    public ClientDto findById(Integer id, UserDetails userDetails) throws AccessDeniedException {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
         Client client = clientRepository.findById(id).orElseThrow(
                 () -> new IllegalStateException("Client not found with id: " + id)
@@ -113,7 +113,7 @@ public class ClientServiceImplementation implements ClientService {
         if (!client.getUser().equals(user)){
             throw new AccessDeniedException("You don't have access to view client with id: " + id);
         }
-        return Optional.of(convertToResponseDto(client));
+        return convertToResponseDto(client);
     }
 
     @Override
@@ -185,28 +185,14 @@ public class ClientServiceImplementation implements ClientService {
     private List<ClientDto> convertToResponseDto(List<Client> clients) {
         List<ClientDto> clientDtoList = new ArrayList<>();
         for (Client client : clients){
-            ClientDto clientDto = new ClientDto();
-            clientDto.setId(client.getId());
-            clientDto.setFirstname(client.getFirstname());
-            clientDto.setLastname(client.getLastname());
-            clientDto.setEmail(client.getEmail());
-            Integer userId = client.getUser().getId();
-            clientDto.setUserId(userId);
-            clientDtoList.add(clientDto);
+            clientDtoList.add(convertToResponseDto(client));
         }
         return clientDtoList;
     }
     private Page<ClientDto> convertToResponseDto(Page<Client> clients){
         List<ClientDto> clientDtoList = new ArrayList<>();
         for (Client client : clients.getContent()){
-            ClientDto clientDto = new ClientDto();
-            clientDto.setId(client.getId());
-            clientDto.setFirstname(client.getFirstname());
-            clientDto.setLastname(client.getLastname());
-            clientDto.setEmail(client.getEmail());
-            Integer userId = client.getUser().getId();
-            clientDto.setUserId(userId);
-            clientDtoList.add(clientDto);
+            clientDtoList.add(convertToResponseDto(client));
         }
         return new PageImpl<>(clientDtoList, clients.getPageable(), clients.getTotalElements());
     }

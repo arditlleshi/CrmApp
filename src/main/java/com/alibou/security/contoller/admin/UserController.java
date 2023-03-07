@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admin/users")
@@ -28,8 +27,8 @@ public class UserController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> findById(@PathVariable("id") Integer id){
-        Optional<UserResponseDto> userResponseDto = userService.findById(id);
-        return userResponseDto.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        UserResponseDto userResponseDto = userService.findById(id);
+        return ResponseEntity.ok(userResponseDto);
     }
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> findAll(){

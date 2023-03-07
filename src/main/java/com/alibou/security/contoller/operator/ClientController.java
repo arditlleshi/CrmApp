@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/operator/clients")
@@ -27,8 +26,8 @@ public class ClientController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<ClientDto> findById(@PathVariable("id") Integer id, @AuthenticationPrincipal UserDetails userDetails) throws AccessDeniedException {
-        Optional<ClientDto> clientDto = clientService.findById(id, userDetails);
-        return clientDto.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        ClientDto clientDto = clientService.findById(id, userDetails);
+        return ResponseEntity.ok(clientDto);
     }
     @GetMapping
     public ResponseEntity<List<ClientDto>> findAll(@AuthenticationPrincipal UserDetails userDetails){

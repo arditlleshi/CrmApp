@@ -4,15 +4,13 @@ import com.alibou.security.dto.AuthenticationResponseDto;
 import com.alibou.security.dto.LoginRequestDto;
 import com.alibou.security.dto.UserRegisterDto;
 import com.alibou.security.dto.UserResponseDto;
-import com.alibou.security.model.User;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
     UserResponseDto create(UserRegisterDto userRegisterDto);
-    Optional<UserResponseDto> findById(Integer id);
+    UserResponseDto findById(Integer id);
     List<UserResponseDto> findAll();
     Page<UserResponseDto> findAll(Integer pageNumber, Integer pageSize);
     UserResponseDto update(Integer id, UserResponseDto userResponseDto);

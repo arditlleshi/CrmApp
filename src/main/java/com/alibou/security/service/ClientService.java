@@ -11,15 +11,15 @@ import java.util.Optional;
 
 public interface ClientService {
     ClientDto create(ClientDto clientDto);
-    Optional<ClientDto> findById(Integer id);
+    ClientDto findById(Integer id);
     List<ClientDto> findAll();
     Page<ClientDto> findAll(Integer pageNumber, Integer pageSize);
-    ClientDto update(Integer id, ClientDto ClientDto);
+    ClientDto update(Integer id, ClientDto clientDto);
     List<ClientDto> search(String query);
     ClientDto create(UserClientDto userClientDto, UserDetails userDetails);
-    Optional<ClientDto> findById(Integer id, UserDetails userDetails) throws AccessDeniedException;
+    ClientDto findById(Integer id, UserDetails userDetails) throws AccessDeniedException;
     List<ClientDto> findAll(UserDetails userDetails);
-    ClientDto update(Integer id, ClientDto ClientDto, UserDetails userDetails) throws AccessDeniedException;
+    ClientDto update(Integer id, ClientDto clientDto, UserDetails userDetails) throws AccessDeniedException;
     Page<ClientDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails);
     List<ClientDto> search(String query, UserDetails userDetails);
 }

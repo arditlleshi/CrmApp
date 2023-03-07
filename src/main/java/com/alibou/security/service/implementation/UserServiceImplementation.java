@@ -23,10 +23,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,10 +48,10 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public Optional<UserResponseDto> findById(Integer id) {
-        return Optional.ofNullable(userRepository.findById(id)
-                .map(this::convertToResponseDto).orElseThrow(() ->
-                        new UsernameNotFoundException("User not found with id: " + id)));
+    public UserResponseDto findById(Integer id) {
+        return userRepository.findById(id)
+                .map(this::convertToResponseDto)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
     }
 
     @Override
@@ -76,24 +74,18 @@ public class UserServiceImplementation implements UserService {
         ));
         return convertToResponseDto(userRepository.findAll(specification));
     }
-
     @Override
     public UserResponseDto update(Integer id, UserResponseDto userResponseDto) {
-        Optional<User> optionalUser = userRepository.findById(id);
-        if (optionalUser.isPresent()){
-            User user = optionalUser.get();
-            user.setFirstname(userResponseDto.getFirstname());
-            user.setLastname(userResponseDto.getLastname());
-            if (userRepository.findByEmail(userResponseDto.getEmail()).isEmpty() || Objects.equals(user.getEmail(), userResponseDto.getEmail())){
-                user.setEmail(userResponseDto.getEmail());
-            }else {
-                throw new IllegalStateException("Email is taken!");
-            }
-            userRepository.save(user);
-            return convertToResponseDto(user);
-        }else {
-            throw new UsernameNotFoundException("User not found with id: " + id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+        if (userRepository.findByEmail(userResponseDto.getEmail()).isPresent() && !Objects.equals(user.getEmail(), userResponseDto.getEmail())){
+            throw new IllegalStateException("Email is taken!");
         }
+        user.setFirstname(userResponseDto.getFirstname());
+        user.setLastname(userResponseDto.getLastname());
+        user.setEmail(userResponseDto.getEmail());
+        userRepository.save(user);
+        return convertToResponseDto(user);
     }
 
     public AuthenticationResponseDto authenticate(LoginRequestDto request) {
@@ -114,13 +106,12 @@ public class UserServiceImplementation implements UserService {
     public String deleteById(Integer id) {
         if (userRepository.findById(id).isEmpty()){
             return "User not found with id: " + id;
-        }else {
-            userRepository.deleteById(id);
-            return "Successfully deleted user with id: " + id;
         }
+        userRepository.deleteById(id);
+        return "Successfully deleted user with id: " + id;
     }
 
-    public User dtoToEntity(UserRegisterDto userRegisterDto) {
+    private User dtoToEntity(UserRegisterDto userRegisterDto) {
         User user = mapper.map(userRegisterDto, User.class);
         List<Role> roles = userRegisterDto.getRoleIds().stream()
                 .map(roleId -> roleRepository.findById(roleId).orElseThrow(() -> new RuntimeException("Role not found with id " + roleId)))
@@ -128,44 +119,25 @@ public class UserServiceImplementation implements UserService {
         user.setRoles(roles);
         return user;
     }
-    public UserResponseDto convertToResponseDto(User user) {
-        UserResponseDto responseDto = mapper.map(user, UserResponseDto.class);
+    private UserResponseDto convertToResponseDto(User user) {
+        UserResponseDto userResponseDto = mapper.map(user, UserResponseDto.class);
         List<String> roleNames = user.getRoles().stream()
-                .map(role -> role.getName().toString())
+                .map(Role::getName)
+                .map(Enum::toString)
                 .collect(Collectors.toList());
-        responseDto.setRoleNames(roleNames);
-        return responseDto;
+        userResponseDto.setRoleNames(roleNames);
+        return userResponseDto;
     }
     private List<UserResponseDto> convertToResponseDto(List<User> userList) {
-        List<UserResponseDto> userResponseDtoList = new ArrayList<>();
-        for (User user : userList) {
-            UserResponseDto userResponseDto = new UserResponseDto();
-            userResponseDto.setId(user.getId());
-            userResponseDto.setFirstname(user.getFirstname());
-            userResponseDto.setLastname(user.getLastname());
-            userResponseDto.setEmail(user.getEmail());
-            List<String> roleNames = user.getRoles().stream()
-                    .map(role -> role.getName().toString())
-                    .collect(Collectors.toList());
-            userResponseDto.setRoleNames(roleNames);
-            userResponseDtoList.add(userResponseDto);
-        }
-        return userResponseDtoList;
+        return userList.stream()
+                .map(this::convertToResponseDto)
+                .collect(Collectors.toList());
     }
+
     private Page<UserResponseDto> convertToResponseDto(Page<User> users){
-        List<UserResponseDto> userResponseDtoList = new ArrayList<>();
-        for (User user : users.getContent()){
-            UserResponseDto userResponseDto = new UserResponseDto();
-            userResponseDto.setId(user.getId());
-            userResponseDto.setFirstname(user.getFirstname());
-            userResponseDto.setLastname(user.getLastname());
-            userResponseDto.setEmail(user.getEmail());
-            List<String> roleNames = user.getRoles().stream()
-                    .map(role -> role.getName().toString())
-                    .toList();
-            userResponseDto.setRoleNames(roleNames);
-            userResponseDtoList.add(userResponseDto);
-        }
+        List<UserResponseDto> userResponseDtoList = users.getContent().stream()
+                .map(this::convertToResponseDto)
+                .collect(Collectors.toList());
         return new PageImpl<>(userResponseDtoList, users.getPageable(), users.getTotalElements());
     }
 }
