@@ -13,4 +13,5 @@ public interface ProductService {
     Page<ProductDto> findAll(Integer pageNumber, Integer pageSize);
     ProductDto update(Integer id, ProductDto productDto);
     String deleteById(Integer id);
+    Page<ProductDto> search(String query, Integer pageNumber, Integer pageSize);
 }

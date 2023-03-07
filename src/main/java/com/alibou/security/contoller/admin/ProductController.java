@@ -34,6 +34,10 @@ public class ProductController {
         Page<ProductDto> productDtoList = productService.findAll(pageNumber, pageSize);
         return ResponseEntity.ok(productDtoList);
     }
+    @GetMapping("/search")
+    public ResponseEntity<Page<ProductDto>> search(@RequestParam("q") String query, @RequestParam("n") Integer pageNumber, @RequestParam("s") Integer pageSize){
+        return ResponseEntity.ok(productService.search(query, pageNumber, pageSize));
+    }
     @PutMapping("/{id}")
     public ResponseEntity<ProductDto> update(@PathVariable("id") Integer id, @RequestBody ProductDto productDto){
         return ResponseEntity.ok(productService.update(id, productDto));

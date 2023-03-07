@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -65,6 +66,15 @@ public class UserServiceImplementation implements UserService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<User> users = userRepository.findAll(pageable);
         return convertToResponseDto(users);
+    }
+    @Override
+    public List<UserResponseDto> search(String query) {
+        Specification<User> specification = ((root, query1, criteriaBuilder) -> criteriaBuilder.or(
+                criteriaBuilder.like(root.get("firstname"), "%" + query + "%"),
+                criteriaBuilder.like(root.get("lastname"), "%" + query + "%"),
+                criteriaBuilder.like(root.get("email"), "%" + query + "%")
+        ));
+        return convertToResponseDto(userRepository.findAll(specification));
     }
 
     @Override

@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,15 @@ public class ClientServiceImplementation implements ClientService {
         Page<Client> clients = clientRepository.findAll(pageable);
         return convertToResponseDto(clients);
     }
+    @Override
+    public List<ClientDto> search(String query) {
+        Specification<Client> specification = ((root, query1, criteriaBuilder) -> criteriaBuilder.or(
+                criteriaBuilder.like(root.get("firstname"), "%" + query + "%"),
+                criteriaBuilder.like(root.get("lastname"), "%" + query + "%"),
+                criteriaBuilder.like(root.get("email"), "%" + query + "%")
+        ));
+        return convertToResponseDto(clientRepository.findAll(specification));
+    }
 
     @Override
     public ClientDto update(Integer id, ClientDto clientDto) {
@@ -79,6 +89,7 @@ public class ClientServiceImplementation implements ClientService {
             throw new UsernameNotFoundException("Client not found with id: " + id);
         }
     }
+
     @Override
     public ClientDto create(UserClientDto userClientDto, UserDetails userDetails) {
         if (clientRepository.findByEmail(userClientDto.getEmail()).isPresent()){
@@ -117,6 +128,22 @@ public class ClientServiceImplementation implements ClientService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Client> clients = clientRepository.findAllByUser(user, pageable);
         return convertToResponseDto(clients);
+    }
+
+    @Override
+    public List<ClientDto> search(String query, UserDetails userDetails) {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        Specification<Client> specification = Specification.where((root, query1, criteriaBuilder) ->
+                criteriaBuilder.and(
+                        criteriaBuilder.or(
+                                criteriaBuilder.like(root.get("firstname"), "%" + query + "%"),
+                                criteriaBuilder.like(root.get("lastname"), "%" + query + "%"),
+                                criteriaBuilder.like(root.get("email"), "%" + query + "%")
+                        ),
+                        criteriaBuilder.equal(root.get("user"), user)
+                )
+        );
+        return convertToResponseDto(clientRepository.findAll(specification));
     }
 
     @Override

@@ -15,9 +15,11 @@ public interface ClientService {
     List<ClientDto> findAll();
     Page<ClientDto> findAll(Integer pageNumber, Integer pageSize);
     ClientDto update(Integer id, ClientDto ClientDto);
+    List<ClientDto> search(String query);
     ClientDto create(UserClientDto userClientDto, UserDetails userDetails);
     Optional<ClientDto> findById(Integer id, UserDetails userDetails) throws AccessDeniedException;
     List<ClientDto> findAll(UserDetails userDetails);
     ClientDto update(Integer id, ClientDto ClientDto, UserDetails userDetails) throws AccessDeniedException;
     Page<ClientDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails);
+    List<ClientDto> search(String query, UserDetails userDetails);
 }

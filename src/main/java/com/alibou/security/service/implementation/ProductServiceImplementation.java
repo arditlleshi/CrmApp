@@ -1,8 +1,6 @@
 package com.alibou.security.service.implementation;
 
-import com.alibou.security.dto.ClientDto;
 import com.alibou.security.dto.ProductDto;
-import com.alibou.security.model.Client;
 import com.alibou.security.model.Product;
 import com.alibou.security.repository.ProductRepository;
 import com.alibou.security.service.ProductService;
@@ -12,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +48,16 @@ public class ProductServiceImplementation implements ProductService {
         Page<Product> products = productRepository.findAll(pageable);
         return convertToResponseDto(products);
     }
+    @Override
+    public Page<ProductDto> search(String query, Integer pageNumber, Integer pageSize) {
+        Specification<Product> specification = ((root, query1, criteriaBuilder) -> criteriaBuilder.or(
+                criteriaBuilder.like(root.get("name"), "%" + query + "%"),
+                criteriaBuilder.like(root.get("unit"), "%" + query + "%")
+        ));
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        Page<Product> products = productRepository.findAll(specification, pageable);
+        return convertToResponseDto(products);
+    }
 
     @Override
     public ProductDto update(Integer id, ProductDto productDto) {
@@ -74,6 +83,7 @@ public class ProductServiceImplementation implements ProductService {
             return "Product not found with id: " + id;
         }
     }
+
     private Product dtoToEntity(ProductDto productDto) {
         return mapper.map(productDto, Product.class);
     }

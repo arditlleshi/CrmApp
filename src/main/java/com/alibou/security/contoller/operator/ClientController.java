@@ -40,6 +40,10 @@ public class ClientController {
         Page<ClientDto> clientDtoList = clientService.findAll(pageNumber, pageSize, userDetails);
         return ResponseEntity.ok(clientDtoList);
     }
+    @GetMapping("/search")
+    public ResponseEntity<List<ClientDto>> search(@RequestParam("q") String query, @AuthenticationPrincipal UserDetails userDetails){
+        return ResponseEntity.ok(clientService.search(query, userDetails));
+    }
     @PutMapping("/{id}")
     public ResponseEntity<ClientDto> update(@PathVariable("id") Integer id, @RequestBody ClientDto clientDto, @AuthenticationPrincipal UserDetails userDetails) throws AccessDeniedException {
         return ResponseEntity.ok(clientService.update(id, clientDto, userDetails));

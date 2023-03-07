@@ -41,6 +41,10 @@ public class UserController {
         Page<UserResponseDto> userResponseDtoPage = userService.findAll(pageNumber, pageSize);
         return ResponseEntity.ok(userResponseDtoPage);
     }
+    @GetMapping("/search")
+    public ResponseEntity<List<UserResponseDto>> search(@RequestParam("q") String query){
+        return ResponseEntity.ok(userService.search(query));
+    }
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> update(@PathVariable("id") Integer id, @RequestBody UserResponseDto userResponseDto){
         return ResponseEntity.ok(userService.update(id, userResponseDto));
