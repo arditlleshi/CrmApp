@@ -10,11 +10,11 @@ import java.util.Optional;
 
 public interface OrderProductService {
     OrderProductResponseDto create(OrderProductDto orderProductDto);
-    Optional<OrderProductResponseDto> findById(Integer id);
+    OrderProductResponseDto findById(Integer id);
     List<OrderProductResponseDto> findAll();
     Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize);
     OrderProductResponseDto create(OrderProductDto orderProductDto, UserDetails userDetails) throws IllegalAccessException;
-    Optional<OrderProductResponseDto> findById(Integer id, UserDetails userDetails) throws IllegalAccessException;
+    OrderProductResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException;
     List<OrderProductResponseDto> findAll(UserDetails userDetails);
     Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails);
 }

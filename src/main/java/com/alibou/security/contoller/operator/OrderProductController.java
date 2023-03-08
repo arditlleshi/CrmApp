@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/operator/order-product")
@@ -26,8 +25,8 @@ public class OrderProductController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<OrderProductResponseDto> findById(@PathVariable("id") Integer id, @AuthenticationPrincipal UserDetails userDetails) throws IllegalAccessException {
-        Optional<OrderProductResponseDto> orderProductResponseDto = orderProductService.findById(id, userDetails);
-        return orderProductResponseDto.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        OrderProductResponseDto orderProductResponseDto = orderProductService.findById(id, userDetails);
+        return ResponseEntity.ok(orderProductResponseDto);
     }
     @GetMapping
     public ResponseEntity<List<OrderProductResponseDto>> findAll(@AuthenticationPrincipal UserDetails userDetails){

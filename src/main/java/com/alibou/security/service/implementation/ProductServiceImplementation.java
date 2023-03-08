@@ -63,7 +63,10 @@ public class ProductServiceImplementation implements ProductService {
     public ProductDto update(Integer id, ProductDto productDto) {
         Optional<Product> productOptional = productRepository.findById(id);
         if (productOptional.isPresent()){
-            Product product = dtoToEntity(productDto);
+            Product product = productOptional.get();
+            product.setName(productDto.getName());
+            product.setPrice(productDto.getPrice());
+            product.setUnit(productDto.getUnit());
             productRepository.save(product);
             return convertToResponseDto(product);
         }else {

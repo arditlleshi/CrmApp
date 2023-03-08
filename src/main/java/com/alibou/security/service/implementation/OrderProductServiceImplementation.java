@@ -11,6 +11,7 @@ import com.alibou.security.repository.OrderRepository;
 import com.alibou.security.repository.ProductRepository;
 import com.alibou.security.repository.UserRepository;
 import com.alibou.security.service.OrderProductService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,10 +37,10 @@ public class OrderProductServiceImplementation implements OrderProductService {
     public OrderProductResponseDto create(OrderProductDto orderProductDto) {
         OrderProduct orderProduct = new OrderProduct();
         Order order = orderRepository.findById(orderProductDto.getOrderId()).orElseThrow(
-                () -> new IllegalStateException("Order not found with id: " + orderProductDto.getOrderId())
+                () -> new EntityNotFoundException("Order not found with id: " + orderProductDto.getOrderId())
         );
         Product product = productRepository.findById(orderProductDto.getProductId()).orElseThrow(
-                () -> new IllegalStateException("Product not found with id: " + orderProductDto.getProductId())
+                () -> new EntityNotFoundException("Product not found with id: " + orderProductDto.getProductId())
         );
 
         orderProduct.setOrder(order);
@@ -55,10 +55,10 @@ public class OrderProductServiceImplementation implements OrderProductService {
     }
 
     @Override
-    public Optional<OrderProductResponseDto> findById(Integer id) {
-        return Optional.ofNullable(orderProductRepository.findById(id)
+    public OrderProductResponseDto findById(Integer id) {
+        return orderProductRepository.findById(id)
                 .map(this::convertToResponseDto).orElseThrow(() ->
-                        new IllegalStateException("Order-Product not found with id: " + id)));
+                        new IllegalStateException("Order-Product not found with id: " + id));
     }
 
     @Override
@@ -77,12 +77,14 @@ public class OrderProductServiceImplementation implements OrderProductService {
     @Override
     public OrderProductResponseDto create(OrderProductDto orderProductDto, UserDetails userDetails) throws IllegalAccessException {
         OrderProduct orderProduct = new OrderProduct();
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
+                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+        );
         Order order = orderRepository.findById(orderProductDto.getOrderId()).orElseThrow(
-                () -> new IllegalStateException("Order not found with id: " + orderProductDto.getOrderId())
+                () -> new EntityNotFoundException("Order not found with id: " + orderProductDto.getOrderId())
         );
         Product product = productRepository.findById(orderProductDto.getProductId()).orElseThrow(
-                () -> new IllegalStateException("Product not found with id: " + orderProductDto.getProductId())
+                () -> new EntityNotFoundException("Product not found with id: " + orderProductDto.getProductId())
         );
         if (!order.getUser().equals(user)){
             throw new IllegalAccessException("You can't add this order!");
@@ -99,27 +101,33 @@ public class OrderProductServiceImplementation implements OrderProductService {
     }
 
     @Override
-    public Optional<OrderProductResponseDto> findById(Integer id, UserDetails userDetails) throws IllegalAccessException {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+    public OrderProductResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException {
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
+                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+        );
         OrderProduct orderProduct = orderProductRepository.findById(id).orElseThrow(
-                () -> new IllegalStateException("Order not found with id: " + id)
+                () -> new EntityNotFoundException("Order not found with id: " + id)
         );
         if (!orderProduct.getOrder().getUser().equals(user)){
             throw new IllegalAccessException("You can't view this order!");
         }
-        return Optional.ofNullable(convertToResponseDto(orderProduct));
+        return convertToResponseDto(orderProduct);
     }
 
     @Override
     public List<OrderProductResponseDto> findAll(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
+                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+        );
         List<OrderProduct> orderProducts = orderProductRepository.findByUserId(user.getId());
         return convertToResponseDto(orderProducts);
     }
 
     @Override
     public Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
+                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+        );
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<OrderProduct> orderProducts = orderProductRepository.findByUserId(user.getId(), pageable);
         return convertToResponseDto(orderProducts);
@@ -131,26 +139,14 @@ public class OrderProductServiceImplementation implements OrderProductService {
     private List<OrderProductResponseDto> convertToResponseDto(List<OrderProduct> orderProducts){
         List<OrderProductResponseDto> orderProductResponseDtoList = new ArrayList<>();
         for (OrderProduct orderProduct : orderProducts){
-            OrderProductResponseDto orderProductResponseDto = new OrderProductResponseDto();
-            orderProductResponseDto.setId(orderProduct.getId());
-            orderProductResponseDto.setProductId(orderProduct.getProduct().getId());
-            orderProductResponseDto.setOrderId(orderProduct.getOrder().getId());
-            orderProductResponseDto.setQuantity(orderProduct.getQuantity());
-            orderProductResponseDto.setAmount(orderProduct.getAmount());
-            orderProductResponseDtoList.add(orderProductResponseDto);
+            orderProductResponseDtoList.add(convertToResponseDto(orderProduct));
         }
         return orderProductResponseDtoList;
     }
     private Page<OrderProductResponseDto> convertToResponseDto(Page<OrderProduct> orderProducts){
         List<OrderProductResponseDto> orderProductResponseDtoList = new ArrayList<>();
         for (OrderProduct orderProduct : orderProducts){
-            OrderProductResponseDto orderProductResponseDto = new OrderProductResponseDto();
-            orderProductResponseDto.setId(orderProduct.getId());
-            orderProductResponseDto.setProductId(orderProduct.getProduct().getId());
-            orderProductResponseDto.setOrderId(orderProduct.getOrder().getId());
-            orderProductResponseDto.setQuantity(orderProduct.getQuantity());
-            orderProductResponseDto.setAmount(orderProduct.getAmount());
-            orderProductResponseDtoList.add(orderProductResponseDto);
+            orderProductResponseDtoList.add(convertToResponseDto(orderProduct));
         }
         return new PageImpl<>(orderProductResponseDtoList, orderProducts.getPageable(), orderProducts.getTotalElements());
     }

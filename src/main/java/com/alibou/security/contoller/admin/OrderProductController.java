@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admin/order-product")
@@ -24,8 +23,8 @@ public class OrderProductController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<OrderProductResponseDto> findById(@PathVariable("id") Integer id){
-        Optional<OrderProductResponseDto> orderProductResponseDto = orderProductService.findById(id);
-        return orderProductResponseDto.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        OrderProductResponseDto orderProductResponseDto = orderProductService.findById(id);
+        return ResponseEntity.ok(orderProductResponseDto);
     }
     @GetMapping
     public ResponseEntity<List<OrderProductResponseDto>> findAll(){
