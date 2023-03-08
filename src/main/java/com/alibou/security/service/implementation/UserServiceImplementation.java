@@ -9,6 +9,7 @@ import com.alibou.security.model.User;
 import com.alibou.security.repository.RoleRepository;
 import com.alibou.security.repository.UserRepository;
 import com.alibou.security.security.JwtService;
+import com.alibou.security.security.UserDetailsServiceImpl;
 import com.alibou.security.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImplementation implements UserService {
+    private final UserDetailsServiceImpl userDetails;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -95,7 +97,7 @@ public class UserServiceImplementation implements UserService {
                         request.getPassword()
                 )
         );
-        var user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+        var user = userDetails.loadUserByUsername(request.getEmail());
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponseDto.builder()
                 .token(jwtToken)

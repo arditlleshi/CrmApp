@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
+
 @RestController
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
@@ -19,37 +22,37 @@ public class UserController {
     private final UserService userService;
     @PostMapping("/all/create")
     public ResponseEntity<UserResponseDto> register(@RequestBody UserRegisterDto request){
-        return ResponseEntity.ok(userService.create(request));
+        return new ResponseEntity<>(userService.create(request), CREATED);
     }
     @PostMapping("/all/authenticate")
     public ResponseEntity<AuthenticationResponseDto> authenticate(@RequestBody LoginRequestDto request){
-        return ResponseEntity.ok(userService.authenticate(request));
+        return new ResponseEntity<>(userService.authenticate(request), OK);
     }
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> findById(@PathVariable("id") Integer id){
         UserResponseDto userResponseDto = userService.findById(id);
-        return ResponseEntity.ok(userResponseDto);
+        return new ResponseEntity<>(userResponseDto, OK);
     }
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> findAll(){
         List<UserResponseDto> userResponseDtoList = userService.findAll();
-        return ResponseEntity.ok(userResponseDtoList);
+        return new ResponseEntity<>(userResponseDtoList, OK);
     }
     @GetMapping("/{pageNumber}/{pageSize}")
     public ResponseEntity<Page<UserResponseDto>> findAll(@PathVariable Integer pageNumber, @PathVariable Integer pageSize){
         Page<UserResponseDto> userResponseDtoPage = userService.findAll(pageNumber, pageSize);
-        return ResponseEntity.ok(userResponseDtoPage);
+        return new ResponseEntity<>(userResponseDtoPage, OK);
     }
     @GetMapping("/search")
     public ResponseEntity<List<UserResponseDto>> search(@RequestParam("q") String query){
-        return ResponseEntity.ok(userService.search(query));
+        return new ResponseEntity<>(userService.search(query), OK);
     }
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> update(@PathVariable("id") Integer id, @RequestBody UserResponseDto userResponseDto){
-        return ResponseEntity.ok(userService.update(id, userResponseDto));
+        return new ResponseEntity<>(userService.update(id, userResponseDto), OK);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable("id") Integer id){
-        return ResponseEntity.ok(userService.deleteById(id));
+        return new ResponseEntity<>(userService.deleteById(id), OK);
     }
 }
