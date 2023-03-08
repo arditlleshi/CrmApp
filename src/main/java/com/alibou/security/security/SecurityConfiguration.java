@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -25,7 +24,7 @@ public class SecurityConfiguration {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/admin/users/all/**", "/api/admin/role")
+                .requestMatchers("/api/admin/users/all/**", "/api/admin/role", "/swagger-ui/**")
                 .permitAll()
                 .requestMatchers("/api/operator/**", "/api/admin/products/search/**")
                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
@@ -36,7 +35,10 @@ public class SecurityConfiguration {
                 .sessionCreationPolicy(STATELESS)
                 .and()
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .formLogin()
+                .and()
+                .httpBasic();
 
         return http.build();
     }
