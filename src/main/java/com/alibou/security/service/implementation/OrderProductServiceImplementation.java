@@ -2,6 +2,7 @@ package com.alibou.security.service.implementation;
 
 import com.alibou.security.dto.OrderProductDto;
 import com.alibou.security.dto.OrderProductResponseDto;
+import com.alibou.security.exception.UserNotFoundException;
 import com.alibou.security.model.Order;
 import com.alibou.security.model.OrderProduct;
 import com.alibou.security.model.Product;
@@ -78,7 +79,7 @@ public class OrderProductServiceImplementation implements OrderProductService {
     public OrderProductResponseDto create(OrderProductDto orderProductDto, UserDetails userDetails) throws IllegalAccessException {
         OrderProduct orderProduct = new OrderProduct();
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
         );
         Order order = orderRepository.findById(orderProductDto.getOrderId()).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + orderProductDto.getOrderId())
@@ -103,7 +104,7 @@ public class OrderProductServiceImplementation implements OrderProductService {
     @Override
     public OrderProductResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
         );
         OrderProduct orderProduct = orderProductRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + id)
@@ -117,7 +118,7 @@ public class OrderProductServiceImplementation implements OrderProductService {
     @Override
     public List<OrderProductResponseDto> findAll(UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
         );
         List<OrderProduct> orderProducts = orderProductRepository.findByUserId(user.getId());
         return convertToResponseDto(orderProducts);
@@ -126,7 +127,7 @@ public class OrderProductServiceImplementation implements OrderProductService {
     @Override
     public Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
         );
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<OrderProduct> orderProducts = orderProductRepository.findByUserId(user.getId(), pageable);

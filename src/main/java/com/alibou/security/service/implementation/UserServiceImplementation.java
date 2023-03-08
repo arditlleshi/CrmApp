@@ -4,6 +4,8 @@ import com.alibou.security.dto.AuthenticationResponseDto;
 import com.alibou.security.dto.LoginRequestDto;
 import com.alibou.security.dto.UserRegisterDto;
 import com.alibou.security.dto.UserResponseDto;
+import com.alibou.security.exception.EmailAlreadyExistsException;
+import com.alibou.security.exception.UserNotFoundException;
 import com.alibou.security.model.Role;
 import com.alibou.security.model.User;
 import com.alibou.security.repository.RoleRepository;
@@ -41,7 +43,7 @@ public class UserServiceImplementation implements UserService {
     @Override
     public UserResponseDto create(UserRegisterDto userRegisterDto) {
         if (userRepository.findByEmail(userRegisterDto.getEmail()).isPresent()){
-            throw new IllegalStateException("Email is already taken!");
+            throw new EmailAlreadyExistsException("Email is already taken!");
         }
         User user = dtoToEntity(userRegisterDto);
         user.setPassword(passwordEncoder.encode(userRegisterDto.getPassword()));
@@ -53,7 +55,7 @@ public class UserServiceImplementation implements UserService {
     public UserResponseDto findById(Integer id) {
         return userRepository.findById(id)
                 .map(this::convertToResponseDto)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
     }
 
     @Override
@@ -79,9 +81,9 @@ public class UserServiceImplementation implements UserService {
     @Override
     public UserResponseDto update(Integer id, UserResponseDto userResponseDto) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         if (userRepository.findByEmail(userResponseDto.getEmail()).isPresent() && !Objects.equals(user.getEmail(), userResponseDto.getEmail())){
-            throw new IllegalStateException("Email is taken!");
+            throw new EmailAlreadyExistsException("Email is already taken!");
         }
         user.setFirstname(userResponseDto.getFirstname());
         user.setLastname(userResponseDto.getLastname());

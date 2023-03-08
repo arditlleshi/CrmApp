@@ -2,6 +2,8 @@ package com.alibou.security.service.implementation;
 
 import com.alibou.security.dto.OrderDto;
 import com.alibou.security.dto.OrderResponseDto;
+import com.alibou.security.exception.ClientNotFoundException;
+import com.alibou.security.exception.UserNotFoundException;
 import com.alibou.security.model.Client;
 import com.alibou.security.model.Order;
 import com.alibou.security.model.User;
@@ -34,9 +36,9 @@ public class OrderServiceImplementation implements OrderService {
         Order order = new Order();
         order.setAmount(0.0);
         order.setUser(userRepository.findById(orderDto.getUserId()).orElseThrow(
-                () -> new EntityNotFoundException("User not found with id: " + orderDto.getUserId())));
+                () -> new UserNotFoundException("User not found with id: " + orderDto.getUserId())));
         order.setClient(clientRepository.findById(orderDto.getClientId()).orElseThrow(
-                () -> new EntityNotFoundException("Client not found with id: " + orderDto.getClientId())));
+                () -> new ClientNotFoundException("Client not found with id: " + orderDto.getClientId())));
         orderRepository.save(order);
         return convertToResponseDto(order);
     }
@@ -64,10 +66,10 @@ public class OrderServiceImplementation implements OrderService {
     @Override
     public OrderResponseDto create(OrderDto orderDto, UserDetails userDetails) throws IllegalAccessException {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
         );
         Client client = clientRepository.findById(orderDto.getClientId()).orElseThrow(
-                () -> new EntityNotFoundException("Client not found with id: " + orderDto.getClientId())
+                () -> new ClientNotFoundException("Client not found with id: " + orderDto.getClientId())
         );
         Order order = new Order();
         if (!client.getUser().equals(user)){
@@ -83,7 +85,7 @@ public class OrderServiceImplementation implements OrderService {
     @Override
     public OrderResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
         );
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + id)
@@ -97,7 +99,7 @@ public class OrderServiceImplementation implements OrderService {
     @Override
     public List<OrderResponseDto> findAll(UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
         );
         List<Order> orders = orderRepository.findAllByUser(user);
         return convertToResponseDto(orders);
@@ -106,7 +108,7 @@ public class OrderServiceImplementation implements OrderService {
     @Override
     public Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
         );
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Order> orders = orderRepository.findAllByUser(user, pageable);
