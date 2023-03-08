@@ -4,6 +4,7 @@ import com.alibou.security.dto.ProductDto;
 import com.alibou.security.model.Product;
 import com.alibou.security.repository.ProductRepository;
 import com.alibou.security.service.ProductService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -11,7 +12,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,10 +30,10 @@ public class ProductServiceImplementation implements ProductService {
     }
 
     @Override
-    public Optional<ProductDto> findById(Integer id) {
-        return Optional.ofNullable(productRepository.findById(id)
+    public ProductDto findById(Integer id) {
+        return productRepository.findById(id)
                 .map(this::convertToResponseDto).orElseThrow(() ->
-                        new UsernameNotFoundException("Product not found with id: " + id)));
+                        new EntityNotFoundException("Product not found with id: " + id));
     }
 
     @Override
@@ -63,14 +63,11 @@ public class ProductServiceImplementation implements ProductService {
     public ProductDto update(Integer id, ProductDto productDto) {
         Optional<Product> productOptional = productRepository.findById(id);
         if (productOptional.isPresent()){
-            Product product = productOptional.get();
-            product.setName(productDto.getName());
-            product.setPrice(productDto.getPrice());
-            product.setUnit(productDto.getUnit());
+            Product product = dtoToEntity(productDto);
             productRepository.save(product);
             return convertToResponseDto(product);
         }else {
-            throw new IllegalStateException("Product not found with id: " + id);
+            throw new EntityNotFoundException("Product not found with id: " + id);
         }
     }
 
@@ -93,24 +90,14 @@ public class ProductServiceImplementation implements ProductService {
     public List<ProductDto> convertToResponseDto(List<Product> products) {
         List<ProductDto> productDtoList = new ArrayList<>();
         for (Product product : products){
-            ProductDto productDto = new ProductDto();
-            productDto.setId(product.getId());
-            productDto.setName(product.getName());
-            productDto.setPrice(product.getPrice());
-            productDto.setUnit(product.getUnit());
-            productDtoList.add(productDto);
+            productDtoList.add(convertToResponseDto(product));
         }
         return productDtoList;
     }
     public Page<ProductDto> convertToResponseDto(Page<Product> products) {
         List<ProductDto> productDtoList = new ArrayList<>();
         for (Product product : products){
-            ProductDto productDto = new ProductDto();
-            productDto.setId(product.getId());
-            productDto.setName(product.getName());
-            productDto.setPrice(product.getPrice());
-            productDto.setUnit(product.getUnit());
-            productDtoList.add(productDto);
+            productDtoList.add(convertToResponseDto(product));
         }
         return new PageImpl<>(productDtoList, products.getPageable(), products.getTotalElements());
     }

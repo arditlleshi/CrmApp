@@ -7,6 +7,7 @@ import com.alibou.security.model.User;
 import com.alibou.security.repository.ClientRepository;
 import com.alibou.security.repository.UserRepository;
 import com.alibou.security.service.ClientService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -15,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +46,7 @@ public class ClientServiceImplementation implements ClientService {
     public ClientDto findById(Integer id) {
         return clientRepository.findById(id)
                 .map(this::convertToResponseDto).orElseThrow(() ->
-                        new UsernameNotFoundException("Client not found with id: " + id));
+                        new EntityNotFoundException("Client not found with id: " + id));
     }
 
     @Override
@@ -86,7 +86,7 @@ public class ClientServiceImplementation implements ClientService {
             clientRepository.save(client);
             return convertToResponseDto(client);
         }else {
-            throw new UsernameNotFoundException("Client not found with id: " + id);
+            throw new EntityNotFoundException("Client not found with id: " + id);
         }
     }
 
@@ -95,7 +95,9 @@ public class ClientServiceImplementation implements ClientService {
         if (clientRepository.findByEmail(userClientDto.getEmail()).isPresent()){
             throw new IllegalStateException("Email is already taken!");
         }
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
+                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+        );
         Client client = new Client();
         client.setFirstname(userClientDto.getFirstname());
         client.setLastname(userClientDto.getLastname());
@@ -106,9 +108,11 @@ public class ClientServiceImplementation implements ClientService {
     }
     @Override
     public ClientDto findById(Integer id, UserDetails userDetails) throws AccessDeniedException {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
+                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+        );
         Client client = clientRepository.findById(id).orElseThrow(
-                () -> new IllegalStateException("Client not found with id: " + id)
+                () -> new EntityNotFoundException("Client not found with id: " + id)
         );
         if (!client.getUser().equals(user)){
             throw new AccessDeniedException("You don't have access to view client with id: " + id);
@@ -118,13 +122,17 @@ public class ClientServiceImplementation implements ClientService {
 
     @Override
     public List<ClientDto> findAll(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
+                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+        );
         List<Client> clients = clientRepository.findAllByUser(user);
         return convertToResponseDto(clients);
     }
     @Override
     public Page<ClientDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
+                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+        );
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Client> clients = clientRepository.findAllByUser(user, pageable);
         return convertToResponseDto(clients);
@@ -132,7 +140,9 @@ public class ClientServiceImplementation implements ClientService {
 
     @Override
     public List<ClientDto> search(String query, UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
+                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+        );
         Specification<Client> specification = Specification.where((root, query1, criteriaBuilder) ->
                 criteriaBuilder.and(
                         criteriaBuilder.or(
@@ -148,9 +158,11 @@ public class ClientServiceImplementation implements ClientService {
 
     @Override
     public ClientDto update(Integer id, ClientDto clientDto, UserDetails userDetails) throws AccessDeniedException {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow();
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
+                () -> new EntityNotFoundException("User not found with email: " + userDetails.getUsername())
+        );
         Client client = clientRepository.findById(id).orElseThrow(
-                () -> new IllegalStateException("Client not found with id: " + id)
+                () -> new EntityNotFoundException("Client not found with id: " + id)
         );
         if (!client.getUser().equals(user)){
             throw new AccessDeniedException("You don't have access to update client with id: " + id);
@@ -172,14 +184,13 @@ public class ClientServiceImplementation implements ClientService {
         client.setLastname(clientDto.getLastname());
         client.setEmail(clientDto.getEmail());
         User user = userRepository.findById(clientDto.getUserId()).orElseThrow(() ->
-                new UsernameNotFoundException("User not found with id: " + clientDto.getUserId()));
+                new EntityNotFoundException("User not found with id: " + clientDto.getUserId()));
         client.setUser(user);
         return client;
     }
     private ClientDto convertToResponseDto(Client client) {
         ClientDto clientDto = mapper.map(client, ClientDto.class);
-        Integer userId = client.getUser().getId();
-        clientDto.setUserId(userId);
+        clientDto.setUserId(client.getUser().getId());
         return clientDto;
     }
     private List<ClientDto> convertToResponseDto(List<Client> clients) {
