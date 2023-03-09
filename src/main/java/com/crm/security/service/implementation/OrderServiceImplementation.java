@@ -2,14 +2,13 @@ package com.crm.security.service.implementation;
 
 import com.crm.security.dto.OrderDto;
 import com.crm.security.dto.OrderResponseDto;
-import com.crm.security.exception.ClientNotFoundException;
 import com.crm.security.exception.UserNotFoundException;
 import com.crm.security.model.Client;
 import com.crm.security.model.Order;
 import com.crm.security.model.User;
-import com.crm.security.repository.ClientRepository;
 import com.crm.security.repository.OrderRepository;
 import com.crm.security.repository.UserRepository;
+import com.crm.security.service.ClientService;
 import com.crm.security.service.OrderService;
 import com.crm.security.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,17 +29,16 @@ import java.util.List;
 public class OrderServiceImplementation implements OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
-    private final ClientRepository clientRepository;
     private final ModelMapper mapper;
     private final UserService userService;
+    private final ClientService clientService;
     @Override
     public OrderResponseDto create(OrderDto orderDto) {
         Order order = new Order();
         order.setAmount(0.0);
         order.setUser(userRepository.findById(orderDto.getUserId()).orElseThrow(
                 () -> new UserNotFoundException("User not found with id: " + orderDto.getUserId())));
-        order.setClient(clientRepository.findById(orderDto.getClientId()).orElseThrow(
-                () -> new ClientNotFoundException("Client not found with id: " + orderDto.getClientId())));
+        order.setClient(clientService.findClientByIdOrThrowException(orderDto.getClientId()));
         orderRepository.save(order);
         return convertToResponseDto(order);
     }
@@ -67,10 +65,8 @@ public class OrderServiceImplementation implements OrderService {
 
     @Override
     public OrderResponseDto create(OrderDto orderDto, UserDetails userDetails) throws IllegalAccessException {
-        User user = userService.findUserByEmail(userDetails);
-        Client client = clientRepository.findById(orderDto.getClientId()).orElseThrow(
-                () -> new ClientNotFoundException("Client not found with id: " + orderDto.getClientId())
-        );
+        User user = userService.findUserByEmailOrThrowException(userDetails);
+        Client client = clientService.findClientByIdOrThrowException(orderDto.getClientId());
         Order order = new Order();
         if (!client.getUser().equals(user)){
             throw new IllegalAccessException("You can't assign this client to the order!");
@@ -84,7 +80,7 @@ public class OrderServiceImplementation implements OrderService {
 
     @Override
     public OrderResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException {
-        User user = userService.findUserByEmail(userDetails);
+        User user = userService.findUserByEmailOrThrowException(userDetails);
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + id)
         );
@@ -96,14 +92,14 @@ public class OrderServiceImplementation implements OrderService {
 
     @Override
     public List<OrderResponseDto> findAll(UserDetails userDetails) {
-        User user = userService.findUserByEmail(userDetails);
+        User user = userService.findUserByEmailOrThrowException(userDetails);
         List<Order> orders = orderRepository.findAllByUser(user);
         return convertToResponseDto(orders);
     }
 
     @Override
     public Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
-        User user = userService.findUserByEmail(userDetails);
+        User user = userService.findUserByEmailOrThrowException(userDetails);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Order> orders = orderRepository.findAllByUser(user, pageable);
         return convertToResponseDto(orders);

@@ -19,5 +19,5 @@ public interface UserService {
     AuthenticationResponseDto authenticate(LoginRequestDto request);
     String deleteById(Integer id);
     List<UserResponseDto> search(String query);
-    User findUserByEmail(UserDetails userDetails);
+    User findUserByEmailOrThrowException(UserDetails userDetails);
 }

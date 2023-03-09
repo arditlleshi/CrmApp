@@ -77,7 +77,7 @@ public class OrderProductServiceImplementation implements OrderProductService {
     @Override
     public OrderProductResponseDto create(OrderProductDto orderProductDto, UserDetails userDetails) throws IllegalAccessException {
         OrderProduct orderProduct = new OrderProduct();
-        User user = userService.findUserByEmail(userDetails);
+        User user = userService.findUserByEmailOrThrowException(userDetails);
         Order order = orderRepository.findById(orderProductDto.getOrderId()).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + orderProductDto.getOrderId())
         );
@@ -100,7 +100,7 @@ public class OrderProductServiceImplementation implements OrderProductService {
 
     @Override
     public OrderProductResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException {
-        User user = userService.findUserByEmail(userDetails);
+        User user = userService.findUserByEmailOrThrowException(userDetails);
         OrderProduct orderProduct = orderProductRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + id)
         );
@@ -112,14 +112,14 @@ public class OrderProductServiceImplementation implements OrderProductService {
 
     @Override
     public List<OrderProductResponseDto> findAll(UserDetails userDetails) {
-        User user = userService.findUserByEmail(userDetails);
+        User user = userService.findUserByEmailOrThrowException(userDetails);
         List<OrderProduct> orderProducts = orderProductRepository.findByUserId(user.getId());
         return convertToResponseDto(orderProducts);
     }
 
     @Override
     public Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
-        User user = userService.findUserByEmail(userDetails);
+        User user = userService.findUserByEmailOrThrowException(userDetails);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<OrderProduct> orderProducts = orderProductRepository.findByUserId(user.getId(), pageable);
         return convertToResponseDto(orderProducts);

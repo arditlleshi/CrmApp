@@ -118,7 +118,7 @@ public class UserServiceImplementation implements UserService {
         return "Successfully deleted user with id: " + id;
     }
     @Override
-    public User findUserByEmail(UserDetails userDetails){
+    public User findUserByEmailOrThrowException(UserDetails userDetails){
         return userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
                 () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername()));
     }

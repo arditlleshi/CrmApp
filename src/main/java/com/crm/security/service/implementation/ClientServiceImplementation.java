@@ -26,7 +26,6 @@ import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -48,9 +47,15 @@ public class ClientServiceImplementation implements ClientService {
 
     @Override
     public ClientDto findById(Integer id) {
-        return clientRepository.findById(id)
-                .map(this::convertToResponseDto).orElseThrow(() ->
-                        new ClientNotFoundException("Client not found with id: " + id));
+        Client client = findClientByIdOrThrowException(id);
+        return convertToResponseDto(client);
+    }
+
+    @Override
+    public Client findClientByIdOrThrowException(Integer id) {
+        return clientRepository.findById(id).orElseThrow(
+                () -> new ClientNotFoundException("Client not found with id: " + id)
+        );
     }
 
     @Override
@@ -77,21 +82,17 @@ public class ClientServiceImplementation implements ClientService {
 
     @Override
     public ClientDto update(Integer id, ClientDto clientDto) {
-        Optional<Client> optionalClient = clientRepository.findById(id);
-        if (optionalClient.isPresent()){
-            Client client = optionalClient.get();
-            client.setFirstname(clientDto.getFirstname());
-            client.setLastname(clientDto.getLastname());
-            if (clientRepository.findByEmail(clientDto.getEmail()).isEmpty() || Objects.equals(client.getEmail(), clientDto.getEmail())){
-                client.setEmail(clientDto.getEmail());
-            }else {
-                throw new EmailAlreadyExistsException("Email is already taken!");
-            }
-            clientRepository.save(client);
-            return convertToResponseDto(client);
+        Client client = findClientByIdOrThrowException(id);
+        client.setFirstname(clientDto.getFirstname());
+        client.setLastname(clientDto.getLastname());
+        if (clientRepository.findByEmail(clientDto.getEmail()).isEmpty() || Objects.equals(client.getEmail(), clientDto.getEmail())){
+            client.setEmail(clientDto.getEmail());
         }else {
-            throw new ClientNotFoundException("Client not found with id: " + id);
+            throw new EmailAlreadyExistsException("Email is already taken!");
         }
+        clientRepository.save(client);
+        return convertToResponseDto(client);
+
     }
 
     @Override
@@ -99,7 +100,7 @@ public class ClientServiceImplementation implements ClientService {
         if (clientRepository.findByEmail(userClientDto.getEmail()).isPresent()){
             throw new EmailAlreadyExistsException("Email is already taken!");
         }
-        User user = userService.findUserByEmail(userDetails);
+        User user = userService.findUserByEmailOrThrowException(userDetails);
         Client client = new Client();
         client.setFirstname(userClientDto.getFirstname());
         client.setLastname(userClientDto.getLastname());
@@ -110,10 +111,8 @@ public class ClientServiceImplementation implements ClientService {
     }
     @Override
     public ClientDto findById(Integer id, UserDetails userDetails) throws AccessDeniedException {
-        User user = userService.findUserByEmail(userDetails);
-        Client client = clientRepository.findById(id).orElseThrow(
-                () -> new ClientNotFoundException("Client not found with id: " + id)
-        );
+        User user = userService.findUserByEmailOrThrowException(userDetails);
+        Client client = findClientByIdOrThrowException(id);
         if (!client.getUser().equals(user)){
             throw new AccessDeniedException("You don't have access to view client with id: " + id);
         }
@@ -122,13 +121,13 @@ public class ClientServiceImplementation implements ClientService {
 
     @Override
     public List<ClientDto> findAll(UserDetails userDetails) {
-        User user = userService.findUserByEmail(userDetails);
+        User user = userService.findUserByEmailOrThrowException(userDetails);
         List<Client> clients = clientRepository.findAllByUser(user);
         return convertToResponseDto(clients);
     }
     @Override
     public Page<ClientDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
-        User user = userService.findUserByEmail(userDetails);
+        User user = userService.findUserByEmailOrThrowException(userDetails);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Client> clients = clientRepository.findAllByUser(user, pageable);
         return convertToResponseDto(clients);
@@ -136,7 +135,7 @@ public class ClientServiceImplementation implements ClientService {
 
     @Override
     public List<ClientDto> search(String query, UserDetails userDetails) {
-        User user = userService.findUserByEmail(userDetails);
+        User user = userService.findUserByEmailOrThrowException(userDetails);
         Specification<Client> specification = Specification.where((root, query1, criteriaBuilder) ->
                 criteriaBuilder.and(
                         criteriaBuilder.or(
@@ -152,10 +151,8 @@ public class ClientServiceImplementation implements ClientService {
 
     @Override
     public ClientDto update(Integer id, ClientDto clientDto, UserDetails userDetails) throws AccessDeniedException {
-        User user = userService.findUserByEmail(userDetails);
-        Client client = clientRepository.findById(id).orElseThrow(
-                () -> new ClientNotFoundException("Client not found with id: " + id)
-        );
+        User user = userService.findUserByEmailOrThrowException(userDetails);
+        Client client = findClientByIdOrThrowException(id);
         if (!client.getUser().equals(user)){
             throw new AccessDeniedException("You don't have access to update client with id: " + id);
         }

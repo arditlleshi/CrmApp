@@ -2,6 +2,7 @@ package com.crm.security.service;
 
 import com.crm.security.dto.ClientDto;
 import com.crm.security.dto.UserClientDto;
+import com.crm.security.model.Client;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -11,6 +12,7 @@ import java.util.List;
 public interface ClientService {
     ClientDto create(ClientDto clientDto);
     ClientDto findById(Integer id);
+    Client findClientByIdOrThrowException(Integer id);
     List<ClientDto> findAll();
     Page<ClientDto> findAll(Integer pageNumber, Integer pageSize);
     ClientDto update(Integer id, ClientDto clientDto);
