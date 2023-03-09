@@ -2,7 +2,6 @@ package com.crm.security.service.implementation;
 
 import com.crm.security.dto.OrderProductDto;
 import com.crm.security.dto.OrderProductResponseDto;
-import com.crm.security.exception.UserNotFoundException;
 import com.crm.security.model.Order;
 import com.crm.security.model.OrderProduct;
 import com.crm.security.model.Product;
@@ -10,8 +9,8 @@ import com.crm.security.model.User;
 import com.crm.security.repository.OrderProductRepository;
 import com.crm.security.repository.OrderRepository;
 import com.crm.security.repository.ProductRepository;
-import com.crm.security.repository.UserRepository;
 import com.crm.security.service.OrderProductService;
+import com.crm.security.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -31,8 +30,8 @@ public class OrderProductServiceImplementation implements OrderProductService {
     private final OrderProductRepository orderProductRepository;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
-    private final UserRepository userRepository;
     private final ModelMapper mapper;
+    private final UserService userService;
 
     @Override
     public OrderProductResponseDto create(OrderProductDto orderProductDto) {
@@ -58,8 +57,8 @@ public class OrderProductServiceImplementation implements OrderProductService {
     @Override
     public OrderProductResponseDto findById(Integer id) {
         return orderProductRepository.findById(id)
-                .map(this::convertToResponseDto).orElseThrow(() ->
-                        new IllegalStateException("Order-Product not found with id: " + id));
+                .map(this::convertToResponseDto).orElseThrow(
+                        () -> new IllegalStateException("Order-Product not found with id: " + id));
     }
 
     @Override
@@ -78,9 +77,7 @@ public class OrderProductServiceImplementation implements OrderProductService {
     @Override
     public OrderProductResponseDto create(OrderProductDto orderProductDto, UserDetails userDetails) throws IllegalAccessException {
         OrderProduct orderProduct = new OrderProduct();
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         Order order = orderRepository.findById(orderProductDto.getOrderId()).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + orderProductDto.getOrderId())
         );
@@ -103,9 +100,7 @@ public class OrderProductServiceImplementation implements OrderProductService {
 
     @Override
     public OrderProductResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         OrderProduct orderProduct = orderProductRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + id)
         );
@@ -117,18 +112,14 @@ public class OrderProductServiceImplementation implements OrderProductService {
 
     @Override
     public List<OrderProductResponseDto> findAll(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         List<OrderProduct> orderProducts = orderProductRepository.findByUserId(user.getId());
         return convertToResponseDto(orderProducts);
     }
 
     @Override
     public Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<OrderProduct> orderProducts = orderProductRepository.findByUserId(user.getId(), pageable);
         return convertToResponseDto(orderProducts);

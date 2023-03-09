@@ -4,12 +4,12 @@ import com.crm.security.dto.ClientDto;
 import com.crm.security.dto.UserClientDto;
 import com.crm.security.exception.ClientNotFoundException;
 import com.crm.security.exception.EmailAlreadyExistsException;
-import com.crm.security.exception.UserNotFoundException;
 import com.crm.security.model.Client;
 import com.crm.security.model.User;
 import com.crm.security.repository.ClientRepository;
 import com.crm.security.repository.UserRepository;
 import com.crm.security.service.ClientService;
+import com.crm.security.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -35,6 +35,7 @@ public class ClientServiceImplementation implements ClientService {
     private final ClientRepository clientRepository;
     private final UserRepository userRepository;
     private final ModelMapper mapper;
+    private final UserService userService;
     @Override
     public ClientDto create(ClientDto clientDto) {
         if (clientRepository.findByEmail(clientDto.getEmail()).isPresent()){
@@ -98,9 +99,7 @@ public class ClientServiceImplementation implements ClientService {
         if (clientRepository.findByEmail(userClientDto.getEmail()).isPresent()){
             throw new EmailAlreadyExistsException("Email is already taken!");
         }
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         Client client = new Client();
         client.setFirstname(userClientDto.getFirstname());
         client.setLastname(userClientDto.getLastname());
@@ -111,9 +110,7 @@ public class ClientServiceImplementation implements ClientService {
     }
     @Override
     public ClientDto findById(Integer id, UserDetails userDetails) throws AccessDeniedException {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         Client client = clientRepository.findById(id).orElseThrow(
                 () -> new ClientNotFoundException("Client not found with id: " + id)
         );
@@ -125,17 +122,13 @@ public class ClientServiceImplementation implements ClientService {
 
     @Override
     public List<ClientDto> findAll(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         List<Client> clients = clientRepository.findAllByUser(user);
         return convertToResponseDto(clients);
     }
     @Override
     public Page<ClientDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Client> clients = clientRepository.findAllByUser(user, pageable);
         return convertToResponseDto(clients);
@@ -143,9 +136,7 @@ public class ClientServiceImplementation implements ClientService {
 
     @Override
     public List<ClientDto> search(String query, UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         Specification<Client> specification = Specification.where((root, query1, criteriaBuilder) ->
                 criteriaBuilder.and(
                         criteriaBuilder.or(
@@ -161,9 +152,7 @@ public class ClientServiceImplementation implements ClientService {
 
     @Override
     public ClientDto update(Integer id, ClientDto clientDto, UserDetails userDetails) throws AccessDeniedException {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         Client client = clientRepository.findById(id).orElseThrow(
                 () -> new ClientNotFoundException("Client not found with id: " + id)
         );
@@ -180,8 +169,7 @@ public class ClientServiceImplementation implements ClientService {
         clientRepository.save(client);
         return convertToResponseDto(client);
     }
-
-    public Client dtoToEntity(ClientDto clientDto) {
+    private Client dtoToEntity(ClientDto clientDto) {
         Client client = new Client();
         client.setFirstname(clientDto.getFirstname());
         client.setLastname(clientDto.getLastname());

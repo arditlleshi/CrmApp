@@ -24,6 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -115,6 +116,11 @@ public class UserServiceImplementation implements UserService {
         }
         userRepository.deleteById(id);
         return "Successfully deleted user with id: " + id;
+    }
+    @Override
+    public User findUserByEmail(UserDetails userDetails){
+        return userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
+                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername()));
     }
 
     private User dtoToEntity(UserRegisterDto userRegisterDto) {

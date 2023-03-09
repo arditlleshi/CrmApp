@@ -11,6 +11,7 @@ import com.crm.security.repository.ClientRepository;
 import com.crm.security.repository.OrderRepository;
 import com.crm.security.repository.UserRepository;
 import com.crm.security.service.OrderService;
+import com.crm.security.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -31,6 +32,7 @@ public class OrderServiceImplementation implements OrderService {
     private final UserRepository userRepository;
     private final ClientRepository clientRepository;
     private final ModelMapper mapper;
+    private final UserService userService;
     @Override
     public OrderResponseDto create(OrderDto orderDto) {
         Order order = new Order();
@@ -65,9 +67,7 @@ public class OrderServiceImplementation implements OrderService {
 
     @Override
     public OrderResponseDto create(OrderDto orderDto, UserDetails userDetails) throws IllegalAccessException {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         Client client = clientRepository.findById(orderDto.getClientId()).orElseThrow(
                 () -> new ClientNotFoundException("Client not found with id: " + orderDto.getClientId())
         );
@@ -84,9 +84,7 @@ public class OrderServiceImplementation implements OrderService {
 
     @Override
     public OrderResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + id)
         );
@@ -98,18 +96,14 @@ public class OrderServiceImplementation implements OrderService {
 
     @Override
     public List<OrderResponseDto> findAll(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         List<Order> orders = orderRepository.findAllByUser(user);
         return convertToResponseDto(orders);
     }
 
     @Override
     public Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername())
-        );
+        User user = userService.findUserByEmail(userDetails);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Order> orders = orderRepository.findAllByUser(user, pageable);
         return convertToResponseDto(orders);
