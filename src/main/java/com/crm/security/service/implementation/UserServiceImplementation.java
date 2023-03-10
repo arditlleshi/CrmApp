@@ -25,6 +25,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -44,9 +45,10 @@ public class UserServiceImplementation implements UserService {
     private final RoleRepository roleRepository;
     @Override
     public UserResponseDto create(UserRegisterDto userRegisterDto) {
-        if (userRepository.findByEmail(userRegisterDto.getEmail()).isPresent()){
-            throw new EmailAlreadyExistsException("Email is already taken!");
-        }
+        userRepository.findByEmail(userRegisterDto.getEmail())
+                .ifPresent(user -> {
+                    throw new EmailAlreadyExistsException("Email is already taken!");
+        });
         User user = dtoToEntity(userRegisterDto);
         user.setPassword(passwordEncoder.encode(userRegisterDto.getPassword()));
         userRepository.save(user);
@@ -55,9 +57,9 @@ public class UserServiceImplementation implements UserService {
 
     @Override
     public UserResponseDto findById(Integer id) {
-        return userRepository.findById(id)
-                .map(this::convertToResponseDto)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        return convertToResponseDto(user);
     }
 
     @Override
@@ -112,7 +114,7 @@ public class UserServiceImplementation implements UserService {
     @Override
     public String deleteById(Integer id) {
         if (userRepository.findById(id).isEmpty()){
-            return "User not found with id: " + id;
+            throw new UsernameNotFoundException("User not found with id: " + id);
         }
         userRepository.deleteById(id);
         return "Successfully deleted user with id: " + id;

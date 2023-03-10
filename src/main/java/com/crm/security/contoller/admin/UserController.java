@@ -1,8 +1,5 @@
 package com.crm.security.contoller.admin;
 
-import com.crm.security.dto.AuthenticationResponseDto;
-import com.crm.security.dto.LoginRequestDto;
-import com.crm.security.dto.UserRegisterDto;
 import com.crm.security.dto.UserResponseDto;
 import com.crm.security.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
@@ -20,14 +16,6 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    @PostMapping("/all/create")
-    public ResponseEntity<UserResponseDto> register(@RequestBody UserRegisterDto request){
-        return new ResponseEntity<>(userService.create(request), CREATED);
-    }
-    @PostMapping("/all/authenticate")
-    public ResponseEntity<AuthenticationResponseDto> authenticate(@RequestBody LoginRequestDto request){
-        return new ResponseEntity<>(userService.authenticate(request), OK);
-    }
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> findById(@PathVariable("id") Integer id){
         UserResponseDto userResponseDto = userService.findById(id);
