@@ -1,9 +1,6 @@
 package com.crm.security.service.implementation;
 
-import com.crm.security.dto.AuthenticationResponseDto;
-import com.crm.security.dto.LoginRequestDto;
-import com.crm.security.dto.UserRegisterDto;
-import com.crm.security.dto.UserResponseDto;
+import com.crm.security.dto.*;
 import com.crm.security.exception.EmailAlreadyExistsException;
 import com.crm.security.exception.UserNotFoundException;
 import com.crm.security.model.Role;
@@ -83,15 +80,19 @@ public class UserServiceImplementation implements UserService {
         return convertToResponseDto(userRepository.findAll(specification));
     }
     @Override
-    public UserResponseDto update(Integer id, UserResponseDto userResponseDto) {
+    public UserResponseDto update(Integer id, UserUpdateDto userUpdateDto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
-        if (userRepository.findByEmail(userResponseDto.getEmail()).isPresent() && !Objects.equals(user.getEmail(), userResponseDto.getEmail())){
+        if (userRepository.findByEmail(userUpdateDto.getEmail()).isPresent() && !Objects.equals(user.getEmail(), userUpdateDto.getEmail())){
             throw new EmailAlreadyExistsException("Email is already taken!");
         }
-        user.setFirstname(userResponseDto.getFirstname());
-        user.setLastname(userResponseDto.getLastname());
-        user.setEmail(userResponseDto.getEmail());
+        user.setFirstname(userUpdateDto.getFirstname());
+        user.setLastname(userUpdateDto.getLastname());
+        user.setEmail(userUpdateDto.getEmail());
+        List<Role> roles = userUpdateDto.getRoleIds().stream()
+                .map(roleId -> roleRepository.findById(roleId).orElseThrow(() -> new EntityNotFoundException("Role not found with id: " + roleId)))
+                .toList();
+        user.setRoles(roles);
         userRepository.save(user);
         return convertToResponseDto(user);
     }

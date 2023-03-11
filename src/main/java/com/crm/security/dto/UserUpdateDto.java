@@ -7,10 +7,9 @@ import java.util.List;
 
 @Getter
 @Setter
-public class UserRegisterDto {
+public class UserUpdateDto {
     private String firstname;
     private String lastname;
     private String email;
-    private String password;
     private List<Integer> roleIds;
 }

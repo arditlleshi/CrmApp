@@ -15,8 +15,8 @@ import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/operator/clients")
 @RequiredArgsConstructor
+@RequestMapping("/api/operator/clients")
 @Component("operatorClientController")
 public class ClientController {
     private final ClientService clientService;

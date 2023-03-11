@@ -1,6 +1,7 @@
 package com.crm.security.contoller.admin;
 
 import com.crm.security.dto.UserResponseDto;
+import com.crm.security.dto.UserUpdateDto;
 import com.crm.security.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,8 +13,8 @@ import java.util.List;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
-@RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
+@RequestMapping("/api/admin/users")
 public class UserController {
     private final UserService userService;
     @GetMapping("/{id}")
@@ -36,8 +37,8 @@ public class UserController {
         return new ResponseEntity<>(userService.search(query), OK);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> update(@PathVariable("id") Integer id, @RequestBody UserResponseDto userResponseDto){
-        return new ResponseEntity<>(userService.update(id, userResponseDto), OK);
+    public ResponseEntity<UserResponseDto> update(@PathVariable("id") Integer id, @RequestBody UserUpdateDto userUpdateDto){
+        return new ResponseEntity<>(userService.update(id, userUpdateDto), OK);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable("id") Integer id){

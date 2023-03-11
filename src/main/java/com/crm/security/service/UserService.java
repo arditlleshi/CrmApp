@@ -1,9 +1,6 @@
 package com.crm.security.service;
 
-import com.crm.security.dto.AuthenticationResponseDto;
-import com.crm.security.dto.LoginRequestDto;
-import com.crm.security.dto.UserRegisterDto;
-import com.crm.security.dto.UserResponseDto;
+import com.crm.security.dto.*;
 import com.crm.security.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,7 +12,7 @@ public interface UserService {
     UserResponseDto findById(Integer id);
     List<UserResponseDto> findAll();
     Page<UserResponseDto> findAll(Integer pageNumber, Integer pageSize);
-    UserResponseDto update(Integer id, UserResponseDto userResponseDto);
+    UserResponseDto update(Integer id, UserUpdateDto userUpdateDto);
     AuthenticationResponseDto authenticate(LoginRequestDto request);
     String deleteById(Integer id);
     List<UserResponseDto> search(String query);
