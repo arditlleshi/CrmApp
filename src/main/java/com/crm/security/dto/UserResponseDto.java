@@ -13,4 +13,5 @@ public class UserResponseDto {
     private String lastname;
     private String email;
     private List<String> role;
+    private String token;
 }

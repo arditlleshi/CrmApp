@@ -4,8 +4,10 @@ import com.crm.security.dto.*;
 import com.crm.security.exception.EmailAlreadyExistsException;
 import com.crm.security.exception.UserNotFoundException;
 import com.crm.security.model.Role;
+import com.crm.security.model.Token;
 import com.crm.security.model.User;
 import com.crm.security.repository.RoleRepository;
+import com.crm.security.repository.TokenRepository;
 import com.crm.security.repository.UserRepository;
 import com.crm.security.security.JwtService;
 import com.crm.security.security.UserDetailsServiceImpl;
@@ -30,11 +32,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.crm.security.enums.TokenType.BEARER;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImplementation implements UserService {
     private final UserDetailsServiceImpl userDetails;
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -49,7 +54,29 @@ public class UserServiceImplementation implements UserService {
         User user = dtoToEntity(userRegisterDto);
         user.setPassword(passwordEncoder.encode(userRegisterDto.getPassword()));
         userRepository.save(user);
+        String jwtToken = jwtService.generateToken(userDetails.loadUserByUsername(user.getEmail()));
+        saveUserToken(user, jwtToken);
         return convertToResponseDto(user);
+    }
+
+    private void saveUserToken(User user, String jwtToken) {
+        Token token = new Token();
+        token.setUser(user);
+        token.setToken(jwtToken);
+        token.setTokenType(BEARER);
+        token.setExpired(false);
+        token.setExpired(false);
+        tokenRepository.save(token);
+    }
+    private void revokeAllUserTokens(User user){
+        var validUserTokens = tokenRepository.findAllValidTokensByUser(user.getId());
+        if (validUserTokens.isEmpty())
+            return;
+        validUserTokens.forEach(t -> {
+            t.setExpired(true);
+            t.setRevoked(true);
+        });
+        tokenRepository.saveAll(validUserTokens);
     }
 
     @Override
@@ -104,11 +131,15 @@ public class UserServiceImplementation implements UserService {
                         request.getPassword()
                 )
         );
-        var user = userDetails.loadUserByUsername(request.getEmail());
-        var jwtToken = jwtService.generateToken(user);
+        UserDetails userDetail = userDetails.loadUserByUsername(request.getEmail());
+        var jwtToken = jwtService.generateToken(userDetail);
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
+                new UserNotFoundException("User not found with email: " + request.getEmail()));
+        revokeAllUserTokens(user);
+        saveUserToken(findUserByEmailOrThrowException(userDetail), jwtToken);
         return AuthenticationResponseDto.builder()
                 .token(jwtToken)
-                .roles(user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                .roles(userDetail.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .build();
     }
 

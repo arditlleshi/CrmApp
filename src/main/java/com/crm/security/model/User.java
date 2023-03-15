@@ -2,6 +2,7 @@ package com.crm.security.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import lombok.*;
 import org.hibernate.Hibernate;
 
@@ -13,7 +14,6 @@ import static jakarta.persistence.FetchType.EAGER;
 @Getter
 @Setter
 @ToString
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "users")
@@ -21,6 +21,8 @@ public class User extends Person{
     private String password;
     @ManyToMany(fetch = EAGER)
     private List<Role> roles;
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
 
     @Override
     public boolean equals(Object o) {
