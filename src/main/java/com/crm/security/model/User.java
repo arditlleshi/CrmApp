@@ -22,6 +22,7 @@ public class User extends Person{
     @ManyToMany(fetch = EAGER)
     private List<Role> roles;
     @OneToMany(mappedBy = "user")
+    @ToString.Exclude
     private List<Token> tokens;
 
     @Override

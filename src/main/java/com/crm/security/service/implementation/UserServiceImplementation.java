@@ -27,6 +27,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 import static com.crm.security.enums.TokenType.BEARER;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserServiceImplementation implements UserService {
     private final UserDetailsServiceImpl userDetails;
@@ -46,7 +48,7 @@ public class UserServiceImplementation implements UserService {
     private final ModelMapper mapper;
     private final RoleRepository roleRepository;
     @Override
-    public UserResponseDto create(UserRegisterDto userRegisterDto) {
+    public UserRegisterResponseDto create(UserRegisterDto userRegisterDto) {
         userRepository.findByEmail(userRegisterDto.getEmail())
                 .ifPresent(user -> {
                     throw new EmailAlreadyExistsException("Email is already taken!");
@@ -56,7 +58,9 @@ public class UserServiceImplementation implements UserService {
         userRepository.save(user);
         String jwtToken = jwtService.generateToken(userDetails.loadUserByUsername(user.getEmail()));
         saveUserToken(user, jwtToken);
-        return convertToResponseDto(user);
+        UserRegisterResponseDto userRegisterResponseDto = mapper.map(user, UserRegisterResponseDto.class);
+        userRegisterResponseDto.setToken(tokenRepository.findByUserEmail(user.getEmail()).getToken());
+        return userRegisterResponseDto;
     }
 
     private void saveUserToken(User user, String jwtToken) {

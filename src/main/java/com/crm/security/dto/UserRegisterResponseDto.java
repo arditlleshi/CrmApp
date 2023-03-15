@@ -7,10 +7,10 @@ import java.util.List;
 
 @Getter
 @Setter
-public class UserResponseDto {
+public class UserRegisterResponseDto {
     private Integer id;
     private String firstname;
     private String lastname;
     private String email;
-    private List<String> role;
+    private String token;
 }

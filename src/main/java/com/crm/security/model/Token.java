@@ -4,12 +4,13 @@ import com.crm.security.enums.TokenType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Getter
 @Setter
 @ToString
-@Entity
+@Entity(name = "tokens")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Token {
@@ -18,11 +19,10 @@ public class Token {
     @Column(nullable = false, unique = true, updatable = false)
     private Integer id;
     private String token;
-    @Enumerated(EnumType.STRING)
+    @Enumerated(STRING)
     private TokenType tokenType;
     private boolean expired;
     private boolean revoked;
     @ManyToOne
-    @JoinColumn(name = "user_id")
     private User user;
 }

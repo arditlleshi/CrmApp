@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.List;
 
 public interface UserService {
-    UserResponseDto create(UserRegisterDto userRegisterDto);
+    UserRegisterResponseDto create(UserRegisterDto userRegisterDto);
     UserResponseDto findById(Integer id);
     List<UserResponseDto> findAll();
     Page<UserResponseDto> findAll(Integer pageNumber, Integer pageSize);
