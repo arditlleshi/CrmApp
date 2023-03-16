@@ -2,6 +2,7 @@ package com.crm.security.service.implementation;
 
 import com.crm.security.dto.OrderDto;
 import com.crm.security.dto.OrderResponseDto;
+import com.crm.security.exception.ClientNotFoundException;
 import com.crm.security.exception.UserNotFoundException;
 import com.crm.security.model.Client;
 import com.crm.security.model.Order;
@@ -33,7 +34,7 @@ public class OrderServiceImplementation implements OrderService {
     private final UserService userService;
     private final ClientService clientService;
     @Override
-    public OrderResponseDto create(OrderDto orderDto) {
+    public OrderResponseDto create(OrderDto orderDto) throws UserNotFoundException, ClientNotFoundException {
         Order order = new Order();
         order.setAmount(0.0);
         order.setUser(userRepository.findById(orderDto.getUserId()).orElseThrow(
@@ -64,7 +65,7 @@ public class OrderServiceImplementation implements OrderService {
     }
 
     @Override
-    public OrderResponseDto create(OrderDto orderDto, UserDetails userDetails) throws IllegalAccessException {
+    public OrderResponseDto create(OrderDto orderDto, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException, ClientNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Client client = clientService.findClientByIdOrThrowException(orderDto.getClientId());
         Order order = new Order();
@@ -79,7 +80,7 @@ public class OrderServiceImplementation implements OrderService {
     }
 
     @Override
-    public OrderResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException {
+    public OrderResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + id)
@@ -91,14 +92,14 @@ public class OrderServiceImplementation implements OrderService {
     }
 
     @Override
-    public List<OrderResponseDto> findAll(UserDetails userDetails) {
+    public List<OrderResponseDto> findAll(UserDetails userDetails) throws UserNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
         List<Order> orders = orderRepository.findAllByUser(user);
         return convertToResponseDto(orders);
     }
 
     @Override
-    public Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
+    public Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) throws UserNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Order> orders = orderRepository.findAllByUser(user, pageable);

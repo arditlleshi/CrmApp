@@ -1,6 +1,6 @@
 package com.crm.security.exception;
 
-public class EmailAlreadyExistsException extends RuntimeException{
+public class EmailAlreadyExistsException extends Exception{
     public EmailAlreadyExistsException(String message){
         super(message);
     }

@@ -2,6 +2,7 @@ package com.crm.security.service;
 
 import com.crm.security.dto.OrderProductDto;
 import com.crm.security.dto.OrderProductResponseDto;
+import com.crm.security.exception.UserNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -12,8 +13,8 @@ public interface OrderProductService {
     OrderProductResponseDto findById(Integer id);
     List<OrderProductResponseDto> findAll();
     Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize);
-    OrderProductResponseDto create(OrderProductDto orderProductDto, UserDetails userDetails) throws IllegalAccessException;
-    OrderProductResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException;
-    List<OrderProductResponseDto> findAll(UserDetails userDetails);
-    Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails);
+    OrderProductResponseDto create(OrderProductDto orderProductDto, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException;
+    OrderProductResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException;
+    List<OrderProductResponseDto> findAll(UserDetails userDetails) throws UserNotFoundException;
+    Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) throws UserNotFoundException;
 }

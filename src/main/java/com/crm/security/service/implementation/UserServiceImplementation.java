@@ -48,11 +48,10 @@ public class UserServiceImplementation implements UserService {
     private final ModelMapper mapper;
     private final RoleRepository roleRepository;
     @Override
-    public UserRegisterResponseDto create(UserRegisterDto userRegisterDto) {
-        userRepository.findByEmail(userRegisterDto.getEmail())
-                .ifPresent(user -> {
-                    throw new EmailAlreadyExistsException("Email is already taken!");
-        });
+    public UserRegisterResponseDto create(UserRegisterDto userRegisterDto) throws EmailAlreadyExistsException {
+        if (userRepository.findByEmail(userRegisterDto.getEmail()).isPresent()){
+            throw new EmailAlreadyExistsException("Email is already taken!");
+        }
         User user = dtoToEntity(userRegisterDto);
         user.setPassword(passwordEncoder.encode(userRegisterDto.getPassword()));
         userRepository.save(user);
@@ -84,7 +83,7 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public UserResponseDto findById(Integer id) {
+    public UserResponseDto findById(Integer id) throws UserNotFoundException {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         return convertToResponseDto(user);
@@ -111,7 +110,7 @@ public class UserServiceImplementation implements UserService {
         return convertToResponseDto(userRepository.findAll(specification));
     }
     @Override
-    public UserResponseDto update(Integer id, UserUpdateDto userUpdateDto) {
+    public UserResponseDto update(Integer id, UserUpdateDto userUpdateDto) throws UserNotFoundException, EmailAlreadyExistsException {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         if (userRepository.findByEmail(userUpdateDto.getEmail()).isPresent() && !Objects.equals(user.getEmail(), userUpdateDto.getEmail())){
@@ -128,7 +127,7 @@ public class UserServiceImplementation implements UserService {
         return convertToResponseDto(user);
     }
 
-    public AuthenticationResponseDto authenticate(LoginRequestDto request) {
+    public AuthenticationResponseDto authenticate(LoginRequestDto request) throws UserNotFoundException {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -156,7 +155,7 @@ public class UserServiceImplementation implements UserService {
         return "Successfully deleted user with id: " + id;
     }
     @Override
-    public User findUserByEmailOrThrowException(UserDetails userDetails){
+    public User findUserByEmailOrThrowException(UserDetails userDetails) throws UserNotFoundException {
         return userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
                 () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername()));
     }

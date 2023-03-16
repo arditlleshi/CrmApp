@@ -4,6 +4,7 @@ import com.crm.security.dto.ClientDto;
 import com.crm.security.dto.UserClientDto;
 import com.crm.security.exception.ClientNotFoundException;
 import com.crm.security.exception.EmailAlreadyExistsException;
+import com.crm.security.exception.UserNotFoundException;
 import com.crm.security.model.Client;
 import com.crm.security.model.User;
 import com.crm.security.repository.ClientRepository;
@@ -36,7 +37,7 @@ public class ClientServiceImplementation implements ClientService {
     private final ModelMapper mapper;
     private final UserService userService;
     @Override
-    public ClientDto create(ClientDto clientDto) {
+    public ClientDto create(ClientDto clientDto) throws EmailAlreadyExistsException {
         if (clientRepository.findByEmail(clientDto.getEmail()).isPresent()){
             throw new EmailAlreadyExistsException("Email is already taken!");
         }
@@ -46,13 +47,13 @@ public class ClientServiceImplementation implements ClientService {
     }
 
     @Override
-    public ClientDto findById(Integer id) {
+    public ClientDto findById(Integer id) throws ClientNotFoundException {
         Client client = findClientByIdOrThrowException(id);
         return convertToResponseDto(client);
     }
 
     @Override
-    public Client findClientByIdOrThrowException(Integer id) {
+    public Client findClientByIdOrThrowException(Integer id) throws ClientNotFoundException {
         return clientRepository.findById(id).orElseThrow(
                 () -> new ClientNotFoundException("Client not found with id: " + id)
         );
@@ -81,7 +82,7 @@ public class ClientServiceImplementation implements ClientService {
     }
 
     @Override
-    public ClientDto update(Integer id, ClientDto clientDto) {
+    public ClientDto update(Integer id, ClientDto clientDto) throws ClientNotFoundException, EmailAlreadyExistsException {
         Client client = findClientByIdOrThrowException(id);
         client.setFirstname(clientDto.getFirstname());
         client.setLastname(clientDto.getLastname());
@@ -96,7 +97,7 @@ public class ClientServiceImplementation implements ClientService {
     }
 
     @Override
-    public ClientDto create(UserClientDto userClientDto, UserDetails userDetails) {
+    public ClientDto create(UserClientDto userClientDto, UserDetails userDetails) throws EmailAlreadyExistsException, UserNotFoundException {
         if (clientRepository.findByEmail(userClientDto.getEmail()).isPresent()){
             throw new EmailAlreadyExistsException("Email is already taken!");
         }
@@ -110,7 +111,7 @@ public class ClientServiceImplementation implements ClientService {
         return convertToResponseDto(client);
     }
     @Override
-    public ClientDto findById(Integer id, UserDetails userDetails) throws AccessDeniedException {
+    public ClientDto findById(Integer id, UserDetails userDetails) throws AccessDeniedException, UserNotFoundException, ClientNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Client client = findClientByIdOrThrowException(id);
         if (!client.getUser().equals(user)){
@@ -120,13 +121,13 @@ public class ClientServiceImplementation implements ClientService {
     }
 
     @Override
-    public List<ClientDto> findAll(UserDetails userDetails) {
+    public List<ClientDto> findAll(UserDetails userDetails) throws UserNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
         List<Client> clients = clientRepository.findAllByUser(user);
         return convertToResponseDto(clients);
     }
     @Override
-    public Page<ClientDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) {
+    public Page<ClientDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) throws UserNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Client> clients = clientRepository.findAllByUser(user, pageable);
@@ -134,7 +135,7 @@ public class ClientServiceImplementation implements ClientService {
     }
 
     @Override
-    public List<ClientDto> search(String query, UserDetails userDetails) {
+    public List<ClientDto> search(String query, UserDetails userDetails) throws UserNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Specification<Client> specification = Specification.where((root, query1, criteriaBuilder) ->
                 criteriaBuilder.and(
@@ -150,7 +151,7 @@ public class ClientServiceImplementation implements ClientService {
     }
 
     @Override
-    public ClientDto update(Integer id, ClientDto clientDto, UserDetails userDetails) throws AccessDeniedException {
+    public ClientDto update(Integer id, ClientDto clientDto, UserDetails userDetails) throws AccessDeniedException, UserNotFoundException, ClientNotFoundException, EmailAlreadyExistsException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Client client = findClientByIdOrThrowException(id);
         if (!client.getUser().equals(user)){

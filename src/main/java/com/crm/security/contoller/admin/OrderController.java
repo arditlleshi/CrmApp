@@ -2,6 +2,8 @@ package com.crm.security.contoller.admin;
 
 import com.crm.security.dto.OrderDto;
 import com.crm.security.dto.OrderResponseDto;
+import com.crm.security.exception.ClientNotFoundException;
+import com.crm.security.exception.UserNotFoundException;
 import com.crm.security.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,7 +20,7 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
     @PostMapping
-    public ResponseEntity<OrderResponseDto> create(@RequestBody OrderDto orderDto) {
+    public ResponseEntity<OrderResponseDto> create(@RequestBody OrderDto orderDto) throws UserNotFoundException, ClientNotFoundException {
         return ResponseEntity.ok(orderService.create(orderDto));
     }
     @GetMapping("/{id}")
