@@ -6,6 +6,7 @@ import com.crm.security.exception.ClientNotFoundException;
 import com.crm.security.exception.EmailAlreadyExistsException;
 import com.crm.security.exception.UserNotFoundException;
 import com.crm.security.service.ClientService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ import java.util.List;
 public class ClientController {
     private final ClientService clientService;
     @PostMapping
-    public ResponseEntity<ClientDto> create(@RequestBody UserClientDto userClientDto, @AuthenticationPrincipal UserDetails userDetails) throws UserNotFoundException, EmailAlreadyExistsException {
+    public ResponseEntity<ClientDto> create(@RequestBody @Valid UserClientDto userClientDto, @AuthenticationPrincipal UserDetails userDetails) throws UserNotFoundException, EmailAlreadyExistsException {
         return ResponseEntity.ok(clientService.create(userClientDto, userDetails));
     }
     @GetMapping("/{id}")
@@ -47,7 +48,7 @@ public class ClientController {
         return ResponseEntity.ok(clientService.search(query, userDetails));
     }
     @PutMapping("/{id}")
-    public ResponseEntity<ClientDto> update(@PathVariable("id") Integer id, @RequestBody ClientDto clientDto, @AuthenticationPrincipal UserDetails userDetails) throws AccessDeniedException, UserNotFoundException, ClientNotFoundException, EmailAlreadyExistsException {
+    public ResponseEntity<ClientDto> update(@PathVariable("id") Integer id, @RequestBody @Valid ClientDto clientDto, @AuthenticationPrincipal UserDetails userDetails) throws AccessDeniedException, UserNotFoundException, ClientNotFoundException, EmailAlreadyExistsException {
         return ResponseEntity.ok(clientService.update(id, clientDto, userDetails));
     }
 }

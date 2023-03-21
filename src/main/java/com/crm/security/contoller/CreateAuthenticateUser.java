@@ -28,7 +28,7 @@ public class CreateAuthenticateUser {
         return new ResponseEntity<>(userService.create(request), CREATED);
     }
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponseDto> authenticate(@RequestBody LoginRequestDto request) throws UserNotFoundException {
+    public ResponseEntity<AuthenticationResponseDto> authenticate(@RequestBody @Valid LoginRequestDto request) throws UserNotFoundException {
         return new ResponseEntity<>(userService.authenticate(request), OK);
     }
 }
