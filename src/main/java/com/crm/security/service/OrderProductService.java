@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.List;
 
 public interface OrderProductService {
-    OrderProductResponseDto create(OrderProductDto orderProductDto);
     OrderProductResponseDto findById(Integer id);
     List<OrderProductResponseDto> findAll();
     Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize);

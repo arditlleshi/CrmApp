@@ -19,4 +19,5 @@ public interface UserService {
     String deleteById(Integer id);
     List<UserResponseDto> search(String query);
     User findUserByEmailOrThrowException(UserDetails userDetails) throws UserNotFoundException;
+    public boolean isUserAdmin(User user);
 }

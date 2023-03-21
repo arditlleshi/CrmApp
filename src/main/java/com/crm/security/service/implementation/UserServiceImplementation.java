@@ -160,6 +160,12 @@ public class UserServiceImplementation implements UserService {
                 () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername()));
     }
 
+    @Override
+    public boolean isUserAdmin(User user) {
+        List<String> userRoles = user.getRoles().stream().map(role -> role.getName().toString()).toList();
+        return userRoles.contains("ROLE_ADMIN");
+    }
+
     private User dtoToEntity(UserRegisterDto userRegisterDto) {
         User user = mapper.map(userRegisterDto, User.class);
         List<Role> roles = userRegisterDto.getRoleIds().stream()

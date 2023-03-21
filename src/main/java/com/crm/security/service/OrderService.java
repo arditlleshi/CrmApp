@@ -10,10 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.List;
 
 public interface OrderService {
-    OrderResponseDto create(OrderDto orderDto) throws UserNotFoundException, ClientNotFoundException;
-    OrderResponseDto findById(Integer id);
-    List<OrderResponseDto> findAll();
-    Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize);
     OrderResponseDto create(OrderDto orderDto, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException, ClientNotFoundException;
     OrderResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException;
     List<OrderResponseDto> findAll(UserDetails userDetails) throws UserNotFoundException;

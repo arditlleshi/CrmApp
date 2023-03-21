@@ -1,7 +1,6 @@
 package com.crm.security.contoller.operator;
 
 import com.crm.security.dto.ClientDto;
-import com.crm.security.dto.UserClientDto;
 import com.crm.security.exception.ClientNotFoundException;
 import com.crm.security.exception.EmailAlreadyExistsException;
 import com.crm.security.exception.UserNotFoundException;
@@ -25,8 +24,8 @@ import java.util.List;
 public class ClientController {
     private final ClientService clientService;
     @PostMapping
-    public ResponseEntity<ClientDto> create(@RequestBody @Valid UserClientDto userClientDto, @AuthenticationPrincipal UserDetails userDetails) throws UserNotFoundException, EmailAlreadyExistsException {
-        return ResponseEntity.ok(clientService.create(userClientDto, userDetails));
+    public ResponseEntity<ClientDto> create(@RequestBody @Valid ClientDto clientDto, @AuthenticationPrincipal UserDetails userDetails) throws UserNotFoundException, EmailAlreadyExistsException {
+        return ResponseEntity.ok(clientService.create(clientDto, userDetails));
     }
     @GetMapping("/{id}")
     public ResponseEntity<ClientDto> findById(@PathVariable("id") Integer id, @AuthenticationPrincipal UserDetails userDetails) throws AccessDeniedException, UserNotFoundException, ClientNotFoundException {

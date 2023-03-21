@@ -34,26 +34,6 @@ public class OrderProductServiceImplementation implements OrderProductService {
     private final ModelMapper mapper;
     private final UserService userService;
 
-    @Override
-    public OrderProductResponseDto create(OrderProductDto orderProductDto) {
-        OrderProduct orderProduct = new OrderProduct();
-        Order order = orderRepository.findById(orderProductDto.getOrderId()).orElseThrow(
-                () -> new EntityNotFoundException("Order not found with id: " + orderProductDto.getOrderId())
-        );
-        Product product = productRepository.findById(orderProductDto.getProductId()).orElseThrow(
-                () -> new EntityNotFoundException("Product not found with id: " + orderProductDto.getProductId())
-        );
-
-        orderProduct.setOrder(order);
-        Double orderAmount = (order.getAmount()) + (orderProductDto.getQuantity() * product.getPrice());
-        order.setAmount(orderAmount);
-
-        orderProduct.setProduct(product);
-        orderProduct.setQuantity(orderProductDto.getQuantity());
-        orderProduct.setAmount(orderProductDto.getQuantity() * product.getPrice());
-        orderProductRepository.save(orderProduct);
-        return convertToResponseDto(orderProduct);
-    }
 
     @Override
     public OrderProductResponseDto findById(Integer id) {
@@ -77,15 +57,15 @@ public class OrderProductServiceImplementation implements OrderProductService {
 
     @Override
     public OrderProductResponseDto create(OrderProductDto orderProductDto, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException {
-        OrderProduct orderProduct = new OrderProduct();
         User user = userService.findUserByEmailOrThrowException(userDetails);
+        OrderProduct orderProduct = new OrderProduct();
         Order order = orderRepository.findById(orderProductDto.getOrderId()).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + orderProductDto.getOrderId())
         );
         Product product = productRepository.findById(orderProductDto.getProductId()).orElseThrow(
                 () -> new EntityNotFoundException("Product not found with id: " + orderProductDto.getProductId())
         );
-        if (!order.getUser().equals(user)){
+        if (!userService.isUserAdmin(user) && !order.getUser().equals(user)){
             throw new IllegalAccessException("You can't add this order!");
         }
         orderProduct.setOrder(order);

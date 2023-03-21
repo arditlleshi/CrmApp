@@ -33,46 +33,20 @@ public class OrderServiceImplementation implements OrderService {
     private final ModelMapper mapper;
     private final UserService userService;
     private final ClientService clientService;
-    @Override
-    public OrderResponseDto create(OrderDto orderDto) throws UserNotFoundException, ClientNotFoundException {
-        Order order = new Order();
-        order.setAmount(0.0);
-        order.setUser(userRepository.findById(orderDto.getUserId()).orElseThrow(
-                () -> new UserNotFoundException("User not found with id: " + orderDto.getUserId())));
-        order.setClient(clientService.findClientByIdOrThrowException(orderDto.getClientId()));
-        orderRepository.save(order);
-        return convertToResponseDto(order);
-    }
-
-    @Override
-    public OrderResponseDto findById(Integer id) {
-        return orderRepository.findById(id)
-                .map(this::convertToResponseDto).orElseThrow(() ->
-                        new IllegalStateException("Order not found with id: " + id));
-    }
-
-    @Override
-    public List<OrderResponseDto> findAll() {
-        List<Order> orders = orderRepository.findAll();
-        return convertToResponseDto(orders);
-    }
-
-    @Override
-    public Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Order> orders = orderRepository.findAll(pageable);
-        return convertToResponseDto(orders);
-    }
 
     @Override
     public OrderResponseDto create(OrderDto orderDto, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException, ClientNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Client client = clientService.findClientByIdOrThrowException(orderDto.getClientId());
         Order order = new Order();
-        if (!client.getUser().equals(user)){
+        if (!userService.isUserAdmin(user) && !client.getUser().equals(user)){
             throw new IllegalAccessException("You can't assign this client to the order!");
+        } else if (!userService.isUserAdmin(user) && client.getUser().equals(user)) {
+            order.setUser(user);
+        }else if (userService.isUserAdmin(user)){
+            order.setUser(userRepository.findById(orderDto.getUserId()).orElseThrow(
+                    () -> new UserNotFoundException("User not found with id: " + orderDto.getUserId())));
         }
-        order.setUser(user);
         order.setClient(client);
         order.setAmount(0.0);
         orderRepository.save(order);
@@ -85,7 +59,7 @@ public class OrderServiceImplementation implements OrderService {
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + id)
         );
-        if (!order.getUser().equals(user)){
+        if (!userService.isUserAdmin(user) && !order.getUser().equals(user)){
             throw new IllegalAccessException("You can't view this order!");
         }
         return convertToResponseDto(order);
@@ -94,15 +68,22 @@ public class OrderServiceImplementation implements OrderService {
     @Override
     public List<OrderResponseDto> findAll(UserDetails userDetails) throws UserNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
-        List<Order> orders = orderRepository.findAllByUser(user);
-        return convertToResponseDto(orders);
+        if (!userService.isUserAdmin(user)){
+            List<Order> orders = orderRepository.findAllByUser(user);
+            return convertToResponseDto(orders);
+        }
+        return convertToResponseDto(orderRepository.findAll());
     }
 
     @Override
     public Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) throws UserNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Order> orders = orderRepository.findAllByUser(user, pageable);
+        if (!userService.isUserAdmin(user)){
+            Page<Order> orders = orderRepository.findAllByUser(user, pageable);
+            return convertToResponseDto(orders);
+        }
+        Page<Order> orders = orderRepository.findAll(pageable);
         return convertToResponseDto(orders);
     }
 
