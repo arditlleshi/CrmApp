@@ -1,4 +1,4 @@
-package com.crm.security.contoller.admin;
+package com.crm.security.contoller;
 
 import com.crm.security.model.Role;
 import com.crm.security.service.RoleService;

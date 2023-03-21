@@ -34,27 +34,6 @@ public class OrderProductServiceImplementation implements OrderProductService {
     private final ModelMapper mapper;
     private final UserService userService;
 
-
-    @Override
-    public OrderProductResponseDto findById(Integer id) {
-        return orderProductRepository.findById(id)
-                .map(this::convertToResponseDto).orElseThrow(
-                        () -> new IllegalStateException("Order-Product not found with id: " + id));
-    }
-
-    @Override
-    public List<OrderProductResponseDto> findAll() {
-        List<OrderProduct> orderProducts = orderProductRepository.findAll();
-        return convertToResponseDto(orderProducts);
-    }
-
-    @Override
-    public Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize) {
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<OrderProduct> orderProducts = orderProductRepository.findAll(pageable);
-        return convertToResponseDto(orderProducts);
-    }
-
     @Override
     public OrderProductResponseDto create(OrderProductDto orderProductDto, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
@@ -85,7 +64,7 @@ public class OrderProductServiceImplementation implements OrderProductService {
         OrderProduct orderProduct = orderProductRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + id)
         );
-        if (!orderProduct.getOrder().getUser().equals(user)){
+        if (!userService.isUserAdmin(user) && !orderProduct.getOrder().getUser().equals(user)){
             throw new IllegalAccessException("You can't view this order!");
         }
         return convertToResponseDto(orderProduct);
@@ -94,7 +73,11 @@ public class OrderProductServiceImplementation implements OrderProductService {
     @Override
     public List<OrderProductResponseDto> findAll(UserDetails userDetails) throws UserNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
-        List<OrderProduct> orderProducts = orderProductRepository.findByUserId(user.getId());
+        if (!userService.isUserAdmin(user)){
+            List<OrderProduct> orderProducts = orderProductRepository.findByUserId(user.getId());
+            return convertToResponseDto(orderProducts);
+        }
+        List<OrderProduct> orderProducts = orderProductRepository.findAll();
         return convertToResponseDto(orderProducts);
     }
 
@@ -102,7 +85,11 @@ public class OrderProductServiceImplementation implements OrderProductService {
     public Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) throws UserNotFoundException {
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<OrderProduct> orderProducts = orderProductRepository.findByUserId(user.getId(), pageable);
+        if (!userService.isUserAdmin(user)){
+            Page<OrderProduct> orderProducts = orderProductRepository.findByUserId(user.getId(), pageable);
+            return convertToResponseDto(orderProducts);
+        }
+        Page<OrderProduct> orderProducts = orderProductRepository.findAll(pageable);
         return convertToResponseDto(orderProducts);
     }
 

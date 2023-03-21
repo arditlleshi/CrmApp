@@ -1,4 +1,4 @@
-package com.crm.security.contoller.operator;
+package com.crm.security.contoller;
 
 import com.crm.security.dto.ClientDto;
 import com.crm.security.exception.ClientNotFoundException;
@@ -11,7 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
@@ -20,7 +19,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/operator/clients")
-@Component("operatorClientController")
 public class ClientController {
     private final ClientService clientService;
     @PostMapping
