@@ -42,7 +42,7 @@ public class ClientServiceImplementation implements ClientService {
         }
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Client client = dtoToEntity(clientDto);
-        if (!userService.isUserAdmin(user)){
+        if (!userService.isUserAdmin(user) || clientDto.getUserId() == null){
             client.setUser(user);
         }else {
             client.setUser(userRepository.findById(clientDto.getUserId()).orElseThrow(

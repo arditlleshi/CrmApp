@@ -84,8 +84,7 @@ public class UserServiceImplementation implements UserService {
 
     @Override
     public UserResponseDto findById(Integer id) throws UserNotFoundException {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         return convertToResponseDto(user);
     }
 
@@ -111,8 +110,7 @@ public class UserServiceImplementation implements UserService {
     }
     @Override
     public UserResponseDto update(Integer id, UserUpdateDto userUpdateDto) throws UserNotFoundException, EmailAlreadyExistsException {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         if (userRepository.findByEmail(userUpdateDto.getEmail()).isPresent() && !Objects.equals(user.getEmail(), userUpdateDto.getEmail())){
             throw new EmailAlreadyExistsException("Email is already taken!");
         }

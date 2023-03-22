@@ -17,7 +17,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/admin/users")
+@RequestMapping("/api/crm-app/users")
 public class UserController {
     private final UserService userService;
     @GetMapping("/{id}")

@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/operator/clients")
+@RequestMapping("/api/crm-app/clients")
 public class ClientController {
     private final ClientService clientService;
     @PostMapping

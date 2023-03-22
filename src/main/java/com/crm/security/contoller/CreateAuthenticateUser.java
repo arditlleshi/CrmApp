@@ -20,7 +20,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/all/users")
+@RequestMapping("/api/crm-app")
 public class CreateAuthenticateUser {
     private final UserService userService;
     @PostMapping("/create")

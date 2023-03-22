@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/operator/order-product")
+@RequestMapping("/api/crm-app/order-product")
 public class OrderProductController {
     private final OrderProductService orderProductService;
     @PostMapping
