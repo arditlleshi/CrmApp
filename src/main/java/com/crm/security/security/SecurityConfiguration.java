@@ -27,7 +27,7 @@ public class SecurityConfiguration {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/crm-app/create", "/api/crm-app/authenticate", "/swagger-ui/**")
+                .requestMatchers("/api/crm-app/create", "/api/crm-app/authenticate", "/swagger-ui/**", "/api/crm-app/refresh-token")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
