@@ -57,7 +57,7 @@ public class UserServiceImplementation implements UserService {
     @Override
     public UserRegisterResponseDto register(UserRegisterDto userRegisterDto) throws EmailAlreadyExistsException{
         if (userRepository.findByEmail(userRegisterDto.getEmail()).isPresent()) {
-            throw new EmailAlreadyExistsException("Email is already taken!");
+            throw new EmailAlreadyExistsException(userRegisterDto.getEmail());
         }
         User user = dtoToEntity(userRegisterDto);
         user.setPassword(passwordEncoder.encode(userRegisterDto.getPassword()));
@@ -113,6 +113,7 @@ public class UserServiceImplementation implements UserService {
                 var authResponse = AuthenticationResponseDto.builder()
                         .accessToken(accessToken)
                         .refreshToken(refreshToken)
+                        .roles(userDetails1.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                         .build();
                 new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
             }
@@ -173,7 +174,7 @@ public class UserServiceImplementation implements UserService {
     public UserResponseDto update(Integer id, UserUpdateDto userUpdateDto) throws UserNotFoundException, EmailAlreadyExistsException{
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         if (userRepository.findByEmail(userUpdateDto.getEmail()).isPresent() && !Objects.equals(user.getEmail(), userUpdateDto.getEmail())) {
-            throw new EmailAlreadyExistsException("Email is already taken!");
+            throw new EmailAlreadyExistsException(userUpdateDto.getEmail());
         }
         user.setFirstname(userUpdateDto.getFirstname());
         user.setLastname(userUpdateDto.getLastname());
@@ -198,7 +199,7 @@ public class UserServiceImplementation implements UserService {
     @Override
     public User findUserByEmailOrThrowException(UserDetails userDetails) throws UserNotFoundException{
         return userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
-                () -> new UserNotFoundException("User not found with email: " + userDetails.getUsername()));
+                () -> new UserNotFoundException(userDetails.getUsername()));
     }
 
     @Override

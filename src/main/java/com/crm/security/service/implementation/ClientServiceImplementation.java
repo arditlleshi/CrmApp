@@ -38,7 +38,7 @@ public class ClientServiceImplementation implements ClientService {
     @Override
     public ClientDto create(ClientDto clientDto, UserDetails userDetails) throws EmailAlreadyExistsException, UserNotFoundException {
         if (clientRepository.findByEmail(clientDto.getEmail()).isPresent()){
-            throw new EmailAlreadyExistsException("Email is already taken!");
+            throw new EmailAlreadyExistsException(clientDto.getEmail());
         }
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Client client = dtoToEntity(clientDto);
@@ -46,7 +46,7 @@ public class ClientServiceImplementation implements ClientService {
             client.setUser(user);
         }else {
             client.setUser(userRepository.findById(clientDto.getUserId()).orElseThrow(
-                    () -> new UserNotFoundException("User not found with id: " + clientDto.getUserId())
+                    () -> new UserNotFoundException(clientDto.getUserId())
             ));
         }
         clientRepository.save(client);
@@ -120,14 +120,14 @@ public class ClientServiceImplementation implements ClientService {
         if (clientRepository.findByEmail(clientDto.getEmail()).isEmpty() || Objects.equals(client.getEmail(), clientDto.getEmail())){
             client.setEmail(clientDto.getEmail());
         }else {
-            throw new EmailAlreadyExistsException("Email is already taken!");
+            throw new EmailAlreadyExistsException(clientDto.getEmail());
         }
         clientRepository.save(client);
         return convertToResponseDto(client);
     }
     public Client findClientByIdOrThrowException(Integer id) throws ClientNotFoundException {
         return clientRepository.findById(id).orElseThrow(
-                () -> new ClientNotFoundException("Client not found with id: " + id)
+                () -> new ClientNotFoundException(id)
         );
     }
     private Client dtoToEntity(ClientDto clientDto) {

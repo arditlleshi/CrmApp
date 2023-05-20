@@ -1,7 +1,7 @@
 package com.crm.security.exception;
 
 public class EmailAlreadyExistsException extends Exception{
-    public EmailAlreadyExistsException(String message){
-        super(message);
+    public EmailAlreadyExistsException(String email){
+        super("Email [" + email + "] is already taken!");
     }
 }
