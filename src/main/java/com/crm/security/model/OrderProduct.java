@@ -35,7 +35,7 @@ public class OrderProduct {
     private LocalDateTime updatedAt;
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o){
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         OrderProduct that = (OrderProduct) o;
@@ -43,7 +43,7 @@ public class OrderProduct {
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode(){
         return getClass().hashCode();
     }
 }

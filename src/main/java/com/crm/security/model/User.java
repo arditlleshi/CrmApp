@@ -17,7 +17,7 @@ import static jakarta.persistence.FetchType.EAGER;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "users")
-public class User extends Person{
+public class User extends Person {
     private String password;
     @ManyToMany(fetch = EAGER)
     private List<Role> roles;
@@ -26,15 +26,10 @@ public class User extends Person{
     private List<Token> tokens;
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o){
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         User user = (User) o;
         return getId() != null && Objects.equals(getId(), user.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
     }
 }

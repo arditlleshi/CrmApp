@@ -11,7 +11,10 @@ import java.util.List;
 
 public interface OrderService {
     OrderResponseDto create(OrderDto orderDto, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException, ClientNotFoundException;
+
     OrderResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException;
+
     List<OrderResponseDto> findAll(UserDetails userDetails) throws UserNotFoundException;
+
     Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) throws UserNotFoundException;
 }

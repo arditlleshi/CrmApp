@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/crm-app/roles")
 public class RoleController {
     private final RoleService roleService;
+
     @PostMapping
     public ResponseEntity<Role> create(@RequestBody Role role){
         Role newRole = roleService.create(role);

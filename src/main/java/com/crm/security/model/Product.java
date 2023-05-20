@@ -35,7 +35,7 @@ public class Product {
     private LocalDateTime updatedAt;
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o){
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Product product = (Product) o;
@@ -43,7 +43,7 @@ public class Product {
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode(){
         return getClass().hashCode();
     }
 }

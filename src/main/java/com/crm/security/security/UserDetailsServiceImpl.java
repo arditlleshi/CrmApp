@@ -12,10 +12,11 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserDetailsServiceImpl implements UserDetailsService{
+public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
+
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
         Optional<User> user = userRepository.findByEmail(username);
         return user.map(UserDetailModel::new).orElseThrow(() -> new UsernameNotFoundException("Username not found!"));
     }

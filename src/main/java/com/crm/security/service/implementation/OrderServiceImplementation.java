@@ -35,15 +35,15 @@ public class OrderServiceImplementation implements OrderService {
     private final ClientService clientService;
 
     @Override
-    public OrderResponseDto create(OrderDto orderDto, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException, ClientNotFoundException {
+    public OrderResponseDto create(OrderDto orderDto, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException, ClientNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Client client = clientService.findClientByIdOrThrowException(orderDto.getClientId());
         Order order = new Order();
-        if (!userService.isUserAdmin(user) && !client.getUser().equals(user)){
+        if (!userService.isUserAdmin(user) && !client.getUser().equals(user)) {
             throw new IllegalAccessException("You can't assign this client to the order!");
         } else if (!userService.isUserAdmin(user) && client.getUser().equals(user)) {
             order.setUser(user);
-        }else if (userService.isUserAdmin(user)){
+        } else if (userService.isUserAdmin(user)) {
             order.setUser(userRepository.findById(orderDto.getUserId()).orElseThrow(
                     () -> new UserNotFoundException("User not found with id: " + orderDto.getUserId())));
         }
@@ -54,21 +54,21 @@ public class OrderServiceImplementation implements OrderService {
     }
 
     @Override
-    public OrderResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException {
+    public OrderResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Order not found with id: " + id)
-        );
-        if (!userService.isUserAdmin(user) && !order.getUser().equals(user)){
+                                                              );
+        if (!userService.isUserAdmin(user) && !order.getUser().equals(user)) {
             throw new IllegalAccessException("You can't view this order!");
         }
         return convertToResponseDto(order);
     }
 
     @Override
-    public List<OrderResponseDto> findAll(UserDetails userDetails) throws UserNotFoundException {
+    public List<OrderResponseDto> findAll(UserDetails userDetails) throws UserNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
-        if (!userService.isUserAdmin(user)){
+        if (!userService.isUserAdmin(user)) {
             List<Order> orders = orderRepository.findAllByUser(user);
             return convertToResponseDto(orders);
         }
@@ -76,10 +76,10 @@ public class OrderServiceImplementation implements OrderService {
     }
 
     @Override
-    public Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) throws UserNotFoundException {
+    public Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) throws UserNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        if (!userService.isUserAdmin(user)){
+        if (!userService.isUserAdmin(user)) {
             Page<Order> orders = orderRepository.findAllByUser(user, pageable);
             return convertToResponseDto(orders);
         }
@@ -90,16 +90,18 @@ public class OrderServiceImplementation implements OrderService {
     private OrderResponseDto convertToResponseDto(Order order){
         return mapper.map(order, OrderResponseDto.class);
     }
+
     private List<OrderResponseDto> convertToResponseDto(List<Order> orders){
         List<OrderResponseDto> orderResponseDtoList = new ArrayList<>();
-        for (Order order : orders){
+        for (Order order : orders) {
             orderResponseDtoList.add(convertToResponseDto(order));
         }
         return orderResponseDtoList;
     }
+
     private Page<OrderResponseDto> convertToResponseDto(Page<Order> orders){
         List<OrderResponseDto> orderResponseDtoList = new ArrayList<>();
-        for (Order order : orders){
+        for (Order order : orders) {
             orderResponseDtoList.add(convertToResponseDto(order));
         }
         return new PageImpl<>(orderResponseDtoList, orders.getPageable(), orders.getTotalElements());

@@ -14,6 +14,8 @@ import java.util.Optional;
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Integer>, JpaSpecificationExecutor<Client> {
     Optional<Client> findByEmail(String email);
+
     List<Client> findAllByUser(User user);
+
     Page<Client> findAllByUser(User user, Pageable pageable);
 }
