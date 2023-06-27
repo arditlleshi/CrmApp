@@ -27,14 +27,18 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class ClientServiceImplementation implements ClientService {
+    
     private final ClientRepository clientRepository;
+    
     private final UserRepository userRepository;
+    
     private final ModelMapper mapper;
+    
     private final UserService userService;
-
+    
+    @Transactional
     @Override
     public ClientDto create(ClientDto clientDto, UserDetails userDetails) throws EmailAlreadyExistsException, UserNotFoundException{
         if (clientRepository.findByEmail(clientDto.getEmail()).isPresent()) {
@@ -52,7 +56,7 @@ public class ClientServiceImplementation implements ClientService {
         clientRepository.save(client);
         return convertToResponseDto(client);
     }
-
+    
     @Override
     public ClientDto findById(Integer id, UserDetails userDetails) throws AccessDeniedException, UserNotFoundException, ClientNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
@@ -64,7 +68,7 @@ public class ClientServiceImplementation implements ClientService {
         }
         return convertToResponseDto(client);
     }
-
+    
     @Override
     public List<ClientDto> findAll(UserDetails userDetails) throws UserNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
@@ -74,7 +78,7 @@ public class ClientServiceImplementation implements ClientService {
         }
         return convertToResponseDto(clientRepository.findAll());
     }
-
+    
     @Override
     public Page<ClientDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) throws UserNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
@@ -86,20 +90,20 @@ public class ClientServiceImplementation implements ClientService {
         Page<Client> clients = clientRepository.findAll(pageable);
         return convertToResponseDto(clients);
     }
-
+    
     @Override
     public List<ClientDto> search(String query, UserDetails userDetails) throws UserNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
         if (!userService.isUserAdmin(user)) {
             Specification<Client> specification = Specification.where((root, query1, criteriaBuilder) ->
-                            criteriaBuilder.and(
-                                    criteriaBuilder.or(
-                                            criteriaBuilder.like(root.get("firstname"), "%" + query + "%"),
-                                            criteriaBuilder.like(root.get("lastname"), "%" + query + "%"),
-                                            criteriaBuilder.like(root.get("email"), "%" + query + "%")
-                                                      ),
-                                    criteriaBuilder.equal(root.get("user"), user)
-                                               )
+                                                                              criteriaBuilder.and(
+                                                                                      criteriaBuilder.or(
+                                                                                              criteriaBuilder.like(root.get("firstname"), "%" + query + "%"),
+                                                                                              criteriaBuilder.like(root.get("lastname"), "%" + query + "%"),
+                                                                                              criteriaBuilder.like(root.get("email"), "%" + query + "%")
+                                                                                                        ),
+                                                                                      criteriaBuilder.equal(root.get("user"), user)
+                                                                                                 )
                                                                      );
             return convertToResponseDto(clientRepository.findAll(specification));
         }
@@ -110,7 +114,8 @@ public class ClientServiceImplementation implements ClientService {
                                                                                                     ));
         return convertToResponseDto(clientRepository.findAll(specification));
     }
-
+    
+    @Transactional
     @Override
     public ClientDto update(Integer id, ClientDto clientDto, UserDetails userDetails) throws AccessDeniedException, UserNotFoundException, ClientNotFoundException, EmailAlreadyExistsException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
@@ -128,13 +133,13 @@ public class ClientServiceImplementation implements ClientService {
         clientRepository.save(client);
         return convertToResponseDto(client);
     }
-
+    
     public Client findClientByIdOrThrowException(Integer id) throws ClientNotFoundException{
         return clientRepository.findById(id).orElseThrow(
                 () -> new ClientNotFoundException(id)
                                                         );
     }
-
+    
     private Client dtoToEntity(ClientDto clientDto){
         Client client = new Client();
         client.setFirstname(clientDto.getFirstname());
@@ -142,13 +147,13 @@ public class ClientServiceImplementation implements ClientService {
         client.setEmail(clientDto.getEmail());
         return client;
     }
-
+    
     private ClientDto convertToResponseDto(Client client){
         ClientDto clientDto = mapper.map(client, ClientDto.class);
         clientDto.setUserId(client.getUser().getId());
         return clientDto;
     }
-
+    
     private List<ClientDto> convertToResponseDto(List<Client> clients){
         List<ClientDto> clientDtoList = new ArrayList<>();
         for (Client client : clients) {
@@ -156,7 +161,7 @@ public class ClientServiceImplementation implements ClientService {
         }
         return clientDtoList;
     }
-
+    
     private Page<ClientDto> convertToResponseDto(Page<Client> clients){
         List<ClientDto> clientDtoList = new ArrayList<>();
         for (Client client : clients.getContent()) {

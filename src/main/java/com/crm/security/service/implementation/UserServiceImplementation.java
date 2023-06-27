@@ -42,18 +42,26 @@ import java.util.stream.Collectors;
 import static com.crm.security.enums.TokenType.BEARER;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class UserServiceImplementation implements UserService {
+    
     private final UserDetailsServiceImpl userDetails;
+    
     private final UserRepository userRepository;
+    
     private final TokenRepository tokenRepository;
+    
     private final PasswordEncoder passwordEncoder;
+    
     private final JwtService jwtService;
+    
     private final AuthenticationManager authenticationManager;
+    
     private final ModelMapper mapper;
+    
     private final RoleRepository roleRepository;
-
+    
+    @Transactional
     @Override
     public UserRegisterResponseDto register(UserRegisterDto userRegisterDto) throws EmailAlreadyExistsException{
         if (userRepository.findByEmail(userRegisterDto.getEmail()).isPresent()) {
@@ -70,7 +78,7 @@ public class UserServiceImplementation implements UserService {
         userRegisterResponseDto.setRefreshToken(refreshToken);
         return userRegisterResponseDto;
     }
-
+    
     public AuthenticationResponseDto authenticate(LoginRequestDto request) throws UserNotFoundException{
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -82,16 +90,16 @@ public class UserServiceImplementation implements UserService {
         var jwtToken = jwtService.generateToken(userDetail);
         var refreshToken = jwtService.generateRefreshToken(userDetail);
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
-                new UserNotFoundException("User not found with email: " + request.getEmail()));
+                                                                                       new UserNotFoundException("User not found with email: " + request.getEmail()));
         revokeAllUserTokens(user);
         saveUserToken(findUserByEmailOrThrowException(userDetail), jwtToken);
         return AuthenticationResponseDto.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .roles(userDetail.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                .build();
+                       .accessToken(jwtToken)
+                       .refreshToken(refreshToken)
+                       .roles(userDetail.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                       .build();
     }
-
+    
     @Override
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException, UserNotFoundException{
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -105,21 +113,48 @@ public class UserServiceImplementation implements UserService {
         if (userEmail != null) {
             var user = this.userRepository.findByEmail(userEmail).orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + userEmail));
             UserDetails userDetails1 = new org.springframework.security.core.userdetails.User(userEmail, user.getPassword(), user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList()));
-
+            
             if (jwtService.isTokenValid(refreshToken, userDetails1)) {
                 var accessToken = jwtService.generateToken(userDetails1);
                 revokeAllUserTokens(user);
                 saveUserToken(findUserByEmailOrThrowException(userDetails1), accessToken);
                 var authResponse = AuthenticationResponseDto.builder()
-                        .accessToken(accessToken)
-                        .refreshToken(refreshToken)
-                        .roles(userDetails1.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                        .build();
+                                           .accessToken(accessToken)
+                                           .refreshToken(refreshToken)
+                                           .roles(userDetails1.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                                           .build();
                 new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
             }
         }
     }
-
+    
+    @Transactional
+    @Override
+    public AuthenticationResponseDto changePassword(ChangePasswordDto request, UserDetails userDetails) throws Exception{
+        User user = findUserByEmailOrThrowException(userDetails);
+        if (passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            if (request.getNewPassword().equals(request.getConfirmNewPassword())) {
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                userRepository.save(user);
+            } else {
+                throw new Exception("Confirmation password does not match New password!");
+            }
+        } else {
+            throw new Exception("Old password is not correct!");
+        }
+        
+        UserDetails userDetail = this.userDetails.loadUserByUsername(user.getEmail());
+        var jwtToken = jwtService.generateToken(userDetail);
+        var refreshToken = jwtService.generateRefreshToken(userDetail);
+        revokeAllUserTokens(user);
+        saveUserToken(findUserByEmailOrThrowException(userDetail), jwtToken);
+        return AuthenticationResponseDto.builder()
+                       .accessToken(jwtToken)
+                       .refreshToken(refreshToken)
+                       .roles(userDetail.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
+                       .build();
+    }
+    
     private void saveUserToken(User user, String jwtToken){
         Token token = new Token();
         token.setUser(user);
@@ -129,7 +164,8 @@ public class UserServiceImplementation implements UserService {
         token.setExpired(false);
         tokenRepository.save(token);
     }
-
+    
+    
     private void revokeAllUserTokens(User user){
         var validUserTokens = tokenRepository.findAllValidTokensByUser(user.getId());
         if (validUserTokens.isEmpty())
@@ -140,26 +176,26 @@ public class UserServiceImplementation implements UserService {
         });
         tokenRepository.saveAll(validUserTokens);
     }
-
+    
     @Override
     public UserResponseDto findById(Integer id) throws UserNotFoundException{
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
         return convertToResponseDto(user);
     }
-
+    
     @Override
     public List<UserResponseDto> findAll(){
         List<User> users = userRepository.findAll();
         return convertToResponseDto(users);
     }
-
+    
     @Override
     public Page<UserResponseDto> findAll(Integer pageNumber, Integer pageSize){
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<User> users = userRepository.findAll(pageable);
         return convertToResponseDto(users);
     }
-
+    
     @Override
     public List<UserResponseDto> search(String query){
         Specification<User> specification = ((root, query1, criteriaBuilder) -> criteriaBuilder.or(
@@ -169,7 +205,8 @@ public class UserServiceImplementation implements UserService {
                                                                                                   ));
         return convertToResponseDto(userRepository.findAll(specification));
     }
-
+    
+    @Transactional
     @Override
     public UserResponseDto update(Integer id, UserUpdateDto userUpdateDto) throws UserNotFoundException, EmailAlreadyExistsException{
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
@@ -180,13 +217,14 @@ public class UserServiceImplementation implements UserService {
         user.setLastname(userUpdateDto.getLastname());
         user.setEmail(userUpdateDto.getEmail());
         List<Role> roles = userUpdateDto.getRoleIds().stream()
-                .map(roleId -> roleRepository.findById(roleId).orElseThrow(() -> new EntityNotFoundException("Role not found with id: " + roleId)))
-                .toList();
+                                   .map(roleId -> roleRepository.findById(roleId).orElseThrow(() -> new EntityNotFoundException("Role not found with id: " + roleId)))
+                                   .toList();
         user.setRoles(roles);
         userRepository.save(user);
         return convertToResponseDto(user);
     }
-
+    
+    @Transactional
     @Override
     public String deleteById(Integer id){
         if (userRepository.findById(id).isEmpty()) {
@@ -195,48 +233,48 @@ public class UserServiceImplementation implements UserService {
         userRepository.deleteById(id);
         return "Successfully deleted user with id: " + id;
     }
-
+    
     @Override
     public User findUserByEmailOrThrowException(UserDetails userDetails) throws UserNotFoundException{
         return userRepository.findByEmail(userDetails.getUsername()).orElseThrow(
                 () -> new UserNotFoundException(userDetails.getUsername()));
     }
-
+    
     @Override
     public boolean isUserAdmin(User user){
         List<String> userRoles = user.getRoles().stream().map(role -> role.getName().toString()).toList();
         return userRoles.contains("ROLE_ADMIN");
     }
-
+    
     private User dtoToEntity(UserRegisterDto userRegisterDto){
         User user = mapper.map(userRegisterDto, User.class);
         List<Role> roles = userRegisterDto.getRoleIds().stream()
-                .map(roleId -> roleRepository.findById(roleId).orElseThrow(() -> new EntityNotFoundException("Role not found with id: " + roleId)))
-                .collect(Collectors.toList());
+                                   .map(roleId -> roleRepository.findById(roleId).orElseThrow(() -> new EntityNotFoundException("Role not found with id: " + roleId)))
+                                   .collect(Collectors.toList());
         user.setRoles(roles);
         return user;
     }
-
+    
     private UserResponseDto convertToResponseDto(User user){
         UserResponseDto userResponseDto = mapper.map(user, UserResponseDto.class);
         List<String> roleNames = user.getRoles().stream()
-                .map(Role::getName)
-                .map(Enum::toString)
-                .collect(Collectors.toList());
+                                         .map(Role::getName)
+                                         .map(Enum::toString)
+                                         .collect(Collectors.toList());
         userResponseDto.setRole(roleNames);
         return userResponseDto;
     }
-
+    
     private List<UserResponseDto> convertToResponseDto(List<User> userList){
         return userList.stream()
-                .map(this::convertToResponseDto)
-                .collect(Collectors.toList());
+                       .map(this::convertToResponseDto)
+                       .collect(Collectors.toList());
     }
-
+    
     private Page<UserResponseDto> convertToResponseDto(Page<User> users){
         List<UserResponseDto> userResponseDtoList = users.getContent().stream()
-                .map(this::convertToResponseDto)
-                .collect(Collectors.toList());
+                                                            .map(this::convertToResponseDto)
+                                                            .collect(Collectors.toList());
         return new PageImpl<>(userResponseDtoList, users.getPageable(), users.getTotalElements());
     }
 }

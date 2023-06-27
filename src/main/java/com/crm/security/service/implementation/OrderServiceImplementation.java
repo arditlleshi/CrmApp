@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,12 +29,18 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImplementation implements OrderService {
+    
     private final OrderRepository orderRepository;
+    
     private final UserRepository userRepository;
+    
     private final ModelMapper mapper;
+    
     private final UserService userService;
+    
     private final ClientService clientService;
-
+    
+    @Transactional
     @Override
     public OrderResponseDto create(OrderDto orderDto, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException, ClientNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
@@ -52,7 +59,7 @@ public class OrderServiceImplementation implements OrderService {
         orderRepository.save(order);
         return convertToResponseDto(order);
     }
-
+    
     @Override
     public OrderResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
@@ -64,7 +71,7 @@ public class OrderServiceImplementation implements OrderService {
         }
         return convertToResponseDto(order);
     }
-
+    
     @Override
     public List<OrderResponseDto> findAll(UserDetails userDetails) throws UserNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
@@ -74,7 +81,7 @@ public class OrderServiceImplementation implements OrderService {
         }
         return convertToResponseDto(orderRepository.findAll());
     }
-
+    
     @Override
     public Page<OrderResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) throws UserNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
@@ -86,11 +93,11 @@ public class OrderServiceImplementation implements OrderService {
         Page<Order> orders = orderRepository.findAll(pageable);
         return convertToResponseDto(orders);
     }
-
+    
     private OrderResponseDto convertToResponseDto(Order order){
         return mapper.map(order, OrderResponseDto.class);
     }
-
+    
     private List<OrderResponseDto> convertToResponseDto(List<Order> orders){
         List<OrderResponseDto> orderResponseDtoList = new ArrayList<>();
         for (Order order : orders) {
@@ -98,7 +105,7 @@ public class OrderServiceImplementation implements OrderService {
         }
         return orderResponseDtoList;
     }
-
+    
     private Page<OrderResponseDto> convertToResponseDto(Page<Order> orders){
         List<OrderResponseDto> orderResponseDtoList = new ArrayList<>();
         for (Order order : orders) {

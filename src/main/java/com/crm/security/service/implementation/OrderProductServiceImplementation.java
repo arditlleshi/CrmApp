@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,12 +29,18 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrderProductServiceImplementation implements OrderProductService {
+    
     private final OrderProductRepository orderProductRepository;
+    
     private final OrderRepository orderRepository;
+    
     private final ProductRepository productRepository;
+    
     private final ModelMapper mapper;
+    
     private final UserService userService;
-
+    
+    @Transactional
     @Override
     public OrderProductResponseDto create(OrderProductDto orderProductDto, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
@@ -50,14 +57,14 @@ public class OrderProductServiceImplementation implements OrderProductService {
         orderProduct.setOrder(order);
         Double orderAmount = (order.getAmount()) + (orderProductDto.getQuantity() * product.getPrice());
         order.setAmount(orderAmount);
-
+        
         orderProduct.setProduct(product);
         orderProduct.setQuantity(orderProductDto.getQuantity());
         orderProduct.setAmount(orderProductDto.getQuantity() * product.getPrice());
         orderProductRepository.save(orderProduct);
         return convertToResponseDto(orderProduct);
     }
-
+    
     @Override
     public OrderProductResponseDto findById(Integer id, UserDetails userDetails) throws IllegalAccessException, UserNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
@@ -69,7 +76,7 @@ public class OrderProductServiceImplementation implements OrderProductService {
         }
         return convertToResponseDto(orderProduct);
     }
-
+    
     @Override
     public List<OrderProductResponseDto> findAll(UserDetails userDetails) throws UserNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
@@ -80,7 +87,7 @@ public class OrderProductServiceImplementation implements OrderProductService {
         List<OrderProduct> orderProducts = orderProductRepository.findAll();
         return convertToResponseDto(orderProducts);
     }
-
+    
     @Override
     public Page<OrderProductResponseDto> findAll(Integer pageNumber, Integer pageSize, UserDetails userDetails) throws UserNotFoundException{
         User user = userService.findUserByEmailOrThrowException(userDetails);
@@ -92,11 +99,11 @@ public class OrderProductServiceImplementation implements OrderProductService {
         Page<OrderProduct> orderProducts = orderProductRepository.findAll(pageable);
         return convertToResponseDto(orderProducts);
     }
-
+    
     private OrderProductResponseDto convertToResponseDto(OrderProduct orderProduct){
         return mapper.map(orderProduct, OrderProductResponseDto.class);
     }
-
+    
     private List<OrderProductResponseDto> convertToResponseDto(List<OrderProduct> orderProducts){
         List<OrderProductResponseDto> orderProductResponseDtoList = new ArrayList<>();
         for (OrderProduct orderProduct : orderProducts) {
@@ -104,7 +111,7 @@ public class OrderProductServiceImplementation implements OrderProductService {
         }
         return orderProductResponseDtoList;
     }
-
+    
     private Page<OrderProductResponseDto> convertToResponseDto(Page<OrderProduct> orderProducts){
         List<OrderProductResponseDto> orderProductResponseDtoList = new ArrayList<>();
         for (OrderProduct orderProduct : orderProducts) {

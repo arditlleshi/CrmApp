@@ -7,6 +7,7 @@ import com.crm.security.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.IOException;
@@ -25,4 +26,6 @@ public interface UserService {
     boolean isUserAdmin(User user);
 
     void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException, UserNotFoundException;
+    
+    AuthenticationResponseDto changePassword(ChangePasswordDto request, UserDetails userDetails) throws Exception;
 }
