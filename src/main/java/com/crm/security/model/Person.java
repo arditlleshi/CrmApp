@@ -22,19 +22,25 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @RequiredArgsConstructor
 @MappedSuperclass
 public abstract class Person {
+
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Integer id;
+
     private String firstname;
+
     private String lastname;
+
     private String email;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     @Override
-    public boolean equals(Object o){
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Person person = (Person) o;
@@ -42,7 +48,7 @@ public abstract class Person {
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return getClass().hashCode();
     }
 }

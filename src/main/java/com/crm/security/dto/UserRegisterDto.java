@@ -7,7 +7,9 @@ import java.util.List;
 
 @Getter
 @Setter
-public class UserRegisterDto extends BaseUserDto{
+public class UserRegisterDto extends BaseUserDto {
+
     private String password;
+
     private List<Integer> roleIds;
 }

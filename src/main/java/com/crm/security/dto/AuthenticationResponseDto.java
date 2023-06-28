@@ -13,9 +13,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthenticationResponseDto {
+
     @JsonProperty("access_token")
     private String accessToken;
+
     @JsonProperty("refresh_token")
     private String refreshToken;
+
     private List<String> roles;
 }

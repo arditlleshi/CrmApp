@@ -7,7 +7,9 @@ import java.util.List;
 
 @Getter
 @Setter
-public class UserResponseDto extends BaseUserDto{
+public class UserResponseDto extends BaseUserDto {
+
     private Integer id;
+
     private List<String> role;
 }

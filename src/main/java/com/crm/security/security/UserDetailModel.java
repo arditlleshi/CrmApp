@@ -10,48 +10,51 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class UserDetailModel implements UserDetails {
+
     private final String username;
+
     private final String password;
+
     private final List<GrantedAuthority> authorities;
 
-    public UserDetailModel(User user){
+    public UserDetailModel(User user) {
         this.username = user.getEmail();
         this.password = user.getPassword();
         this.authorities = user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList());
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities(){
+    public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.authorities;
     }
 
     @Override
-    public String getPassword(){
+    public String getPassword() {
         return this.password;
     }
 
     @Override
-    public String getUsername(){
+    public String getUsername() {
         return this.username;
     }
 
     @Override
-    public boolean isAccountNonExpired(){
+    public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
-    public boolean isAccountNonLocked(){
+    public boolean isAccountNonLocked() {
         return true;
     }
 
     @Override
-    public boolean isCredentialsNonExpired(){
+    public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
-    public boolean isEnabled(){
+    public boolean isEnabled() {
         return true;
     }
 }

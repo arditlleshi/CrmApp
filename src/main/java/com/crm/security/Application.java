@@ -13,6 +13,7 @@ import static com.crm.security.enums.RoleName.ROLE_OPERATOR;
 @SpringBootApplication
 @RequiredArgsConstructor
 public class Application implements CommandLineRunner {
+
     private final RoleRepository roleRepository;
 
     public static void main(String[] args) {
@@ -25,7 +26,7 @@ public class Application implements CommandLineRunner {
         roleAdmin.setName(ROLE_ADMIN);
         Role roleOperator = new Role();
         roleOperator.setName(ROLE_OPERATOR);
-        if (roleRepository.findAll().isEmpty()){
+        if (roleRepository.findAll().isEmpty()) {
             roleRepository.save(roleAdmin);
             roleRepository.save(roleOperator);
         }

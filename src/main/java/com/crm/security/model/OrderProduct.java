@@ -19,23 +19,30 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @AllArgsConstructor
 @Entity(name = "order_products")
 public class OrderProduct {
+
     @Id
     @GeneratedValue(strategy = IDENTITY)
     @Column(nullable = false, unique = true, updatable = false)
     private Integer id;
+
     @OneToOne
     private Product product;
+
     @OneToOne
     private Order order;
+
     private Double quantity;
+
     private Double amount;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     @Override
-    public boolean equals(Object o){
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         OrderProduct that = (OrderProduct) o;
@@ -43,7 +50,7 @@ public class OrderProduct {
     }
 
     @Override
-    public int hashCode(){
+    public int hashCode() {
         return getClass().hashCode();
     }
 }

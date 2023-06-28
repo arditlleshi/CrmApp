@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface ProductService {
+
     ProductDto create(ProductDto productDto);
 
     ProductDto findById(Integer id);

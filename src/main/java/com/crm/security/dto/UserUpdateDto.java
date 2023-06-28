@@ -7,6 +7,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class UserUpdateDto extends BaseUserDto{
+public class UserUpdateDto extends BaseUserDto {
+
     private List<Integer> roleIds;
 }

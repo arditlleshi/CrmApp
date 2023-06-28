@@ -25,25 +25,26 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor
 @RequestMapping("/api/crm-app")
 public class CreateAuthenticateUser {
+
     private final UserService userService;
 
     @PostMapping("/create")
-    public ResponseEntity<UserRegisterResponseDto> register(@RequestBody @Valid UserRegisterDto request) throws EmailAlreadyExistsException{
+    public ResponseEntity<UserRegisterResponseDto> register(@RequestBody @Valid UserRegisterDto request) throws EmailAlreadyExistsException {
         return new ResponseEntity<>(userService.register(request), CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponseDto> authenticate(@RequestBody @Valid LoginRequestDto request) throws UserNotFoundException{
+    public ResponseEntity<AuthenticationResponseDto> authenticate(@RequestBody @Valid LoginRequestDto request) throws UserNotFoundException {
         return new ResponseEntity<>(userService.authenticate(request), OK);
     }
-    
+
     @PostMapping("/change-password")
-    public ResponseEntity<AuthenticationResponseDto> changePassword(@RequestBody @Valid ChangePasswordDto request, @AuthenticationPrincipal UserDetails userDetails) throws Exception{
+    public ResponseEntity<AuthenticationResponseDto> changePassword(@RequestBody @Valid ChangePasswordDto request, @AuthenticationPrincipal UserDetails userDetails) throws Exception {
         return new ResponseEntity<>(userService.changePassword(request, userDetails), OK);
     }
 
     @PostMapping("/refresh-token")
-    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException, UserNotFoundException{
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException, UserNotFoundException {
         userService.refreshToken(request, response);
     }
 }

@@ -12,6 +12,7 @@ import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 public interface ClientService {
+
     Client findClientByIdOrThrowException(Integer id) throws ClientNotFoundException;
 
     ClientDto create(ClientDto clientDto, UserDetails userDetails) throws EmailAlreadyExistsException, UserNotFoundException;

@@ -14,10 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/crm-app/roles")
 public class RoleController {
+
     private final RoleService roleService;
 
     @PostMapping
-    public ResponseEntity<Role> create(@RequestBody Role role){
+    public ResponseEntity<Role> create(@RequestBody Role role) {
         Role newRole = roleService.create(role);
         return new ResponseEntity<>(newRole, HttpStatus.CREATED);
     }
